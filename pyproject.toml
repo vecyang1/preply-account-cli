@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "preply-account-cli"
+version = "0.2.0"
+description = "Read-only local CLI for your own Preply tutor and learner accounts via logged-in Chrome tabs."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+preply = "preply_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
