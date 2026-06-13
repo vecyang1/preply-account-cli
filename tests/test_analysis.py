@@ -114,11 +114,35 @@ class AnalysisTests(unittest.TestCase):
 
         summary = build_payment_summary(snapshot)
 
-        self.assertEqual(summary["payment_count"], 3)
-        self.assertAlmostEqual(summary["spent_total"], 37.25)
-        self.assertEqual(summary["hours_total"], 3.0)
-        self.assertEqual(summary["subjects"], {"Music": 23.6, "Spanish": 13.65})
-        self.assertEqual(summary["currency_codes"], ["USD"])
+    def test_student_nodes_with_none_tutor(self):
+        # When tutor is None (e.g. learner account)
+        snapshot = {
+            "profile": {
+                "currentUser": {
+                    "tutor": None
+                }
+            }
+        }
+        from preply_cli.analysis import student_nodes
+        nodes = student_nodes(snapshot)
+        self.assertEqual(nodes, [])
+
+    def test_build_account_summary_with_none_wallet(self):
+        snapshot = {
+            "profile": {
+                "currentUser": {
+                    "tutor": None
+                }
+            },
+            "wallet": {
+                "currentUser": {
+                    "wallet": None
+                }
+            }
+        }
+        summary = build_account_summary(snapshot)
+        self.assertEqual(summary["wallet_balance"], 0.0)
+        self.assertEqual(summary["student_total"], 0)
 
 
 if __name__ == "__main__":

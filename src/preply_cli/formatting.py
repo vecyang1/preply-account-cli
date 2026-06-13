@@ -42,3 +42,18 @@ def format_table(rows: Iterable[dict[str, object]], columns: list[str]) -> str:
     rule = "  ".join("-" * widths[column] for column in columns)
     body = [line(row) for row in rows]
     return "\n".join([header, rule, *body]) if rows else "\n".join([header, rule])
+
+
+def format_csv(rows: Iterable[dict[str, object]], columns: list[str]) -> str:
+    import csv
+    import io
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=columns, extrasaction="ignore", lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        formatted_row = {}
+        for col in columns:
+            val = row.get(col)
+            formatted_row[col] = "" if val is None else str(val)
+        writer.writerow(formatted_row)
+    return output.getvalue()

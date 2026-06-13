@@ -51,12 +51,12 @@ class PreplyClient:
         return data
 
     def _student_connection(self, data: dict[str, Any]) -> dict[str, Any]:
-        return (
+        tutor = (
             data.get("profile", {})
             .get("currentUser", {})
-            .get("tutor", {})
-            .get("studentManagementTutorings", {})
+            .get("tutor")
         )
+        return (tutor or {}).get("studentManagementTutorings", {})
 
     def _extend_student_pages(self, data: dict[str, Any], limit: int, initial_offset: int = 0) -> None:
         connection = self._student_connection(data)

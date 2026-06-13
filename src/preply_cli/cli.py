@@ -121,78 +121,120 @@ def _payment_rows(data: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def _emit(data: Any, rows: list[dict[str, Any]] | None, columns: list[str], as_json: bool) -> None:
-    if as_json:
+def _emit(data: Any, rows: list[dict[str, Any]] | None, columns: list[str], args: argparse.Namespace) -> None:
+    if getattr(args, "json", False):
         _print_json(data)
+    elif getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(rows or [], columns), end="")
     else:
         print(format_table(rows or [], columns))
 
 
 def cmd_status(args: argparse.Namespace) -> None:
-    client = _client(args)
-    data = client.overview(limit=args.limit)
-    summary = build_account_summary(data)
-    account = data.get("_account") or {}
-    if args.json:
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        client = _client(args)
+        data = client.overview(limit=args.limit)
+    summary = data.get("summary") or build_account_summary(data)
+    account = data.get("_account") or (data.get("account") or {}).get("currentUser") or {}
+    if getattr(args, "json", False):
         _print_json({"summary": summary, "raw": data})
         return
     rows = [
-        {"metric": "account_role", "value": account.get("role")},
-        {"metric": "account_name", "value": account.get("name")},
-        {"metric": "user_id", "value": account.get("userId")},
-        {"metric": "students", "value": summary["student_total"]},
-        {"metric": "loaded_students", "value": summary["loaded_students"]},
-        {"metric": "confirmed_lessons", "value": summary["confirmed_lessons_total"]},
-        {"metric": "student_revenue_total", "value": money(summary["student_revenue_total_usd"])},
-        {"metric": "wallet_balance", "value": money(summary["wallet_balance"])},
-        {"metric": "price_min", "value": money(summary["price_range_usd"]["min"])},
-        {"metric": "price_max", "value": money(summary["price_range_usd"]["max"])},
-        {"metric": "statuses", "value": json.dumps(summary["status_counts"], sort_keys=True)},
+        {"metric": "account_role", "value": account.get("role") or account.get("preplyCliRole")},
+        {"metric": "account_name", "value": account.get("name") or account.get("fullName") or account.get("firstName")},
+        {"metric": "user_id", "value": account.get("userId") or account.get("id")},
+        {"metric": "students", "value": summary.get("student_total")},
+        {"metric": "loaded_students", "value": summary.get("loaded_students")},
+        {"metric": "confirmed_lessons", "value": summary.get("confirmed_lessons_total")},
+        {"metric": "student_revenue_total", "value": money(summary.get("student_revenue_total_usd"))},
+        {"metric": "wallet_balance", "value": money(summary.get("wallet_balance"))},
+        {"metric": "price_min", "value": money((summary.get("price_range_usd") or {}).get("min"))},
+        {"metric": "price_max", "value": money((summary.get("price_range_usd") or {}).get("max"))},
+        {"metric": "statuses", "value": json.dumps(summary.get("status_counts", {}), sort_keys=True)},
     ]
-    print(format_table(rows, ["metric", "value"]))
+    if getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(rows, ["metric", "value"]), end="")
+    else:
+        print(format_table(rows, ["metric", "value"]))
 
 
 def cmd_students(args: argparse.Namespace) -> None:
-    data = _client(args).students(limit=args.limit, offset=args.offset)
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        data = _client(args).students(limit=args.limit, offset=args.offset)
     rows = _student_rows(data)
-    _emit(data, rows, ["id", "student", "status", "subject", "lessons", "hours", "price", "earned", "timezone"], args.json)
+    _emit(data, rows, ["id", "student", "status", "subject", "lessons", "hours", "price", "earned", "timezone"], args)
 
 
 def cmd_wallet(args: argparse.Namespace) -> None:
-    data = _client(args).wallet()
-    wallet = (data.get("wallet") or {}).get("currentUser") or {}
-    if args.json:
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        data = _client(args).wallet()
+    wallet_user = (data.get("wallet") or {}).get("currentUser") or data.get("currentUser") or {}
+    wallet = wallet_user.get("wallet") or {}
+    tutor = wallet_user.get("tutor") or {}
+    profile = wallet_user.get("profile") or {}
+    if getattr(args, "json", False):
         _print_json(data)
         return
     rows = [
-        {"metric": "user_id", "value": wallet.get("id")},
-        {"metric": "tutor_id", "value": (wallet.get("tutor") or {}).get("id")},
-        {"metric": "last_payout_method", "value": (wallet.get("tutor") or {}).get("lastPayoutMethod")},
-        {"metric": "currency", "value": ((wallet.get("profile") or {}).get("currency") or {}).get("code")},
-        {"metric": "balance", "value": money((wallet.get("wallet") or {}).get("balance"))},
+        {"metric": "user_id", "value": wallet_user.get("id")},
+        {"metric": "tutor_id", "value": tutor.get("id")},
+        {"metric": "last_payout_method", "value": tutor.get("lastPayoutMethod")},
+        {"metric": "currency", "value": (profile.get("currency") or {}).get("code")},
+        {"metric": "balance", "value": money(wallet.get("balance"))},
     ]
-    print(format_table(rows, ["metric", "value"]))
+    if getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(rows, ["metric", "value"]), end="")
+    else:
+        print(format_table(rows, ["metric", "value"]))
 
 
 def cmd_schedule(args: argparse.Namespace) -> None:
-    data = _client(args).schedule(days=args.days, tzname=args.timezone)
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        data = _client(args).schedule(days=args.days, tzname=args.timezone)
     rows = _schedule_rows(data)
-    _emit(data, rows, ["start", "end", "student", "status", "lesson_id", "tutoring_id", "duration"], args.json)
+    _emit(data, rows, ["start", "end", "student", "status", "lesson_id", "tutoring_id", "duration"], args)
 
 
 def cmd_messages(args: argparse.Namespace) -> None:
-    data = _client(args).messages()
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        data = _client(args).messages()
     rows = _message_rows(data)[: args.limit]
-    _emit(data, rows, ["thread_id", "student", "unread", "labels", "last_author", "last_message"], args.json)
+    _emit(data, rows, ["thread_id", "student", "unread", "labels", "last_author", "last_message"], args)
 
 
 def cmd_student(args: argparse.Namespace) -> None:
-    data = _client(args).student_detail(
-        tutoring_id=args.tutoring_id,
-        past_limit=args.past_limit,
-        include_insights_for_lesson_id=args.lesson_insights,
-    )
-    if args.json:
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        snapshot = json.loads(path.read_text())
+        if "student_details" in snapshot:
+            data = snapshot["student_details"].get(str(args.tutoring_id)) or {}
+        else:
+            data = snapshot
+    else:
+        data = _client(args).student_detail(
+            tutoring_id=args.tutoring_id,
+            past_limit=args.past_limit,
+            include_insights_for_lesson_id=args.lesson_insights,
+        )
+    if getattr(args, "json", False):
         _print_json(data)
         return
     stats = (data.get("statistics") or {}).get("tutoring") or {}
@@ -207,7 +249,11 @@ def cmd_student(args: argparse.Namespace) -> None:
         {"metric": "price", "value": money(((stats.get("price") or {}).get("value")))},
         {"metric": "month_since_start", "value": stats.get("monthSinceStart")},
     ]
-    print(format_table(rows, ["metric", "value"]))
+    if getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(rows, ["metric", "value"]), end="")
+    else:
+        print(format_table(rows, ["metric", "value"]))
 
 
 def cmd_snapshot(args: argparse.Namespace) -> None:
@@ -230,20 +276,28 @@ def cmd_snapshot(args: argparse.Namespace) -> None:
 
 
 def cmd_analyze(args: argparse.Namespace) -> None:
-    client = _client(args)
-    data = client.overview(limit=args.limit)
-    data["schedule"] = client.schedule(days=args.days, tzname=args.timezone).get("schedule")
-    if args.deep:
-        details: dict[str, Any] = {}
-        for student in student_nodes(data):
-            tutoring_id = student.get("id")
-            if tutoring_id:
-                details[str(tutoring_id)] = client.student_detail(int(tutoring_id), past_limit=args.past_limit)
-        data["student_details"] = details
-    summary = build_account_summary(data)
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        client = _client(args)
+        data = client.overview(limit=args.limit)
+        data["schedule"] = client.schedule(days=args.days, tzname=args.timezone).get("schedule")
+        if args.deep:
+            details: dict[str, Any] = {}
+            for student in student_nodes(data):
+                tutoring_id = student.get("id")
+                if tutoring_id:
+                    details[str(tutoring_id)] = client.student_detail(int(tutoring_id), past_limit=args.past_limit)
+            data["student_details"] = details
+    summary = data.get("summary") or build_account_summary(data)
     timeline = build_timeline(data)
-    if args.json:
+    if getattr(args, "json", False):
         _print_json({"summary": summary, "timeline": timeline, "raw": data})
+        return
+    if getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(timeline[: args.timeline_limit], ["kind", "datetime", "student_name", "status", "lesson_id", "tutoring_id", "duration"]), end="")
         return
     print("Summary")
     print(format_table([{"metric": key, "value": value} for key, value in summary.items()], ["metric", "value"]))
@@ -273,15 +327,18 @@ def cmd_compare(args: argparse.Namespace) -> None:
                 "wallet": money(summary.get("wallet_balance")),
             }
         )
-    if args.json:
+    if getattr(args, "json", False):
         _print_json(rows)
+    elif getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(rows, ["account", "role", "students", "lessons", "payments", "earned", "spent", "wallet"]), end="")
     else:
         print(format_table(rows, ["account", "role", "students", "lessons", "payments", "earned", "spent", "wallet"]))
 
 
 def cmd_account(args: argparse.Namespace) -> None:
     data = _client(args).account()
-    if args.json:
+    if getattr(args, "json", False):
         _print_json(data)
         return
     account = data.get("_account") or {}
@@ -295,10 +352,18 @@ def cmd_account(args: argparse.Namespace) -> None:
 
 
 def cmd_history(args: argparse.Namespace) -> None:
-    data = _client(args).payment_history(limit=args.limit)
-    summary = build_payment_summary(data)
-    if args.json:
+    if getattr(args, "file", None):
+        path = Path(args.file).expanduser().resolve()
+        data = json.loads(path.read_text())
+    else:
+        data = _client(args).payment_history(limit=args.limit)
+    summary = data.get("summary") or build_payment_summary(data)
+    if getattr(args, "json", False):
         _print_json({"summary": summary, "raw": data})
+        return
+    if getattr(args, "csv", False):
+        from .formatting import format_csv
+        print(format_csv(_payment_rows(data), ["id", "time", "subject", "tutor", "hours", "amount", "refundable"]), end="")
         return
     print("Summary")
     print(format_table([{"metric": key, "value": value} for key, value in summary.items()], ["metric", "value"]))
@@ -320,41 +385,55 @@ def build_parser() -> argparse.ArgumentParser:
     account.set_defaults(func=cmd_account)
 
     status = sub.add_parser("status", help="Show account totals, wallet balance, and loaded student revenue.")
+    status.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     status.add_argument("--limit", type=int, default=100)
     status.add_argument("--json", action="store_true")
+    status.add_argument("--csv", action="store_true", help="Format output as CSV.")
     status.set_defaults(func=cmd_status)
 
     students = sub.add_parser("students", help="List tutor students with price, lesson, and revenue fields.")
+    students.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     students.add_argument("--limit", type=int, default=100)
     students.add_argument("--offset", type=int, default=0)
     students.add_argument("--json", action="store_true")
+    students.add_argument("--csv", action="store_true", help="Format output as CSV.")
     students.set_defaults(func=cmd_students)
 
     wallet = sub.add_parser("wallet", help="Show tutor wallet balance and payout method.")
+    wallet.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     wallet.add_argument("--json", action="store_true")
+    wallet.add_argument("--csv", action="store_true", help="Format output as CSV.")
     wallet.set_defaults(func=cmd_wallet)
 
     schedule = sub.add_parser("schedule", help="Show upcoming class schedule.")
+    schedule.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     schedule.add_argument("--days", type=int, default=14)
     schedule.add_argument("--timezone")
     schedule.add_argument("--json", action="store_true")
+    schedule.add_argument("--csv", action="store_true", help="Format output as CSV.")
     schedule.set_defaults(func=cmd_schedule)
 
     messages = sub.add_parser("messages", help="Show message thread summaries and last message previews.")
+    messages.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     messages.add_argument("--limit", type=int, default=20)
     messages.add_argument("--json", action="store_true")
+    messages.add_argument("--csv", action="store_true", help="Format output as CSV.")
     messages.set_defaults(func=cmd_messages)
 
     history = sub.add_parser("history", help="Show learner payment history from settings/history where available.")
+    history.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     history.add_argument("--limit", type=int, default=100)
     history.add_argument("--json", action="store_true")
+    history.add_argument("--csv", action="store_true", help="Format output as CSV.")
     history.set_defaults(func=cmd_history)
 
     student = sub.add_parser("student", help="Show per-student statistics, lessons, and revenue history by tutoring id.")
     student.add_argument("tutoring_id", type=int)
+    student.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     student.add_argument("--past-limit", type=int, default=20)
     student.add_argument("--lesson-insights", type=int, help="Fetch lesson insight headline for a lesson id.")
     student.add_argument("--json", action="store_true")
+    student.add_argument("--csv", action="store_true", help="Format output as CSV.")
     student.set_defaults(func=cmd_student)
 
     snapshot = sub.add_parser("snapshot", help="Save a local account snapshot for later comparison.")
@@ -366,6 +445,7 @@ def build_parser() -> argparse.ArgumentParser:
     snapshot.set_defaults(func=cmd_snapshot)
 
     analyze = sub.add_parser("analyze", help="Summarize revenue, classes, prices, and a lesson timeline.")
+    analyze.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
     analyze.add_argument("--limit", type=int, default=100)
     analyze.add_argument("--days", type=int, default=30)
     analyze.add_argument("--timezone")
@@ -373,11 +453,13 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--past-limit", type=int, default=10)
     analyze.add_argument("--timeline-limit", type=int, default=30)
     analyze.add_argument("--json", action="store_true")
+    analyze.add_argument("--csv", action="store_true", help="Format output as CSV.")
     analyze.set_defaults(func=cmd_analyze)
 
     compare = sub.add_parser("compare", help="Compare saved snapshots from different Preply accounts.")
     compare.add_argument("snapshots", nargs="+")
     compare.add_argument("--json", action="store_true")
+    compare.add_argument("--csv", action="store_true", help="Format output as CSV.")
     compare.set_defaults(func=cmd_compare)
     return parser
 

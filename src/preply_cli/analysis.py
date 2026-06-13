@@ -16,12 +16,8 @@ def _number(value: Any, default: float = 0.0) -> float:
 
 def student_nodes(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     profile = snapshot.get("profile") or {}
-    return (
-        profile.get("currentUser", {})
-        .get("tutor", {})
-        .get("studentManagementTutorings", {})
-        .get("nodes", [])
-    )
+    tutor = profile.get("currentUser", {}).get("tutor")
+    return (tutor or {}).get("studentManagementTutorings", {}).get("nodes", [])
 
 
 def build_account_summary(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -29,14 +25,11 @@ def build_account_summary(snapshot: dict[str, Any]) -> dict[str, Any]:
     status_counts = Counter(str(student.get("status") or "UNKNOWN") for student in students)
     prices = [_number(student.get("pricePerHourUsd"), default=-1) for student in students]
     prices = [price for price in prices if price >= 0]
-    total_count = (
-        (snapshot.get("profile") or {})
-        .get("currentUser", {})
-        .get("tutor", {})
-        .get("studentManagementTutorings", {})
-        .get("totalCount", len(students))
-    )
-    wallet = (snapshot.get("wallet") or {}).get("currentUser", {}).get("wallet") or {}
+    profile = snapshot.get("profile") or {}
+    tutor = profile.get("currentUser", {}).get("tutor")
+    total_count = (tutor or {}).get("studentManagementTutorings", {}).get("totalCount", len(students))
+    wallet_user = (snapshot.get("wallet") or {}).get("currentUser") or {}
+    wallet = wallet_user.get("wallet") or {}
     return {
         "student_total": int(total_count or 0),
         "loaded_students": len(students),
