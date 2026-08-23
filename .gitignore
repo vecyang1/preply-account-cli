@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+data/
+*.log
+# Build artifacts (`python -m build`, `pip install -e .`).
+build/
+dist/
+*.egg-info/
+# Working planning doc: contains account emails and live private evidence.
+docs/automation-plan.md
+# Reverse-engineering working artifacts (not the tool itself).
+graphify-out/
+# Working hardening plan: contains live account evidence (ids, names, counts).
+docs/production-hardening-plan.md
+# Reverse-engineered Preply API catalogue: kept local, deliberately not published.
+# ~1MB of Preply private-API query text. See docs/reverse-engineering-notes.md.
+docs/preply-graphql-catalog.md
+docs/preply-operations.graphql
+docs/preply-operation-names.txt
+# Private workspace backlink card: contains 2nd Brain vault paths and local usernames.
+PROJECT_LINKS.md
+# Git bundle of the pre-purge history (catalogue + workspace card). Kept as the
+# rollback for the history rewrite, as a file rather than as branches: branches
+# would be republished by `git push --all`. Restore with:
+#   git clone .private-backups/history-before-purge.bundle <dir>
+.private-backups/
+# GitNexus index and editor cruft.
+.gitnexus/
+.DS_Store

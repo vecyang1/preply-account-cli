@@ -1,0 +1,54 @@
+[build-system]
+# >=77 for PEP 639 (`license` as an SPDX string plus `license-files`).
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "preply-account-cli"
+# Single source of truth is preply_cli.__version__ (see [tool.setuptools.dynamic]).
+dynamic = ["version"]
+description = "Read-only CLI for your own Preply learner/tutor account, over a stored session or a logged-in Chrome tab."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+keywords = ["preply", "cli", "graphql", "tutoring", "personal-automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    # `session capture` decrypts Chrome's macOS cookie store and is macOS-only.
+    # Everything else, including the login-free `tutor-reviews`, is portable.
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "cryptography>=42",
+    "curl_cffi>=0.7",
+]
+
+[project.urls]
+Homepage = "https://github.com/vecyang1/preply-account-cli"
+Source = "https://github.com/vecyang1/preply-account-cli"
+Issues = "https://github.com/vecyang1/preply-account-cli/issues"
+Changelog = "https://github.com/vecyang1/preply-account-cli/blob/main/CHANGELOG.md"
+Security = "https://github.com/vecyang1/preply-account-cli/blob/main/SECURITY.md"
+
+[project.optional-dependencies]
+# 'requests' is a fallback HTTP client if curl_cffi is unavailable.
+fallback = ["requests>=2.31"]
+
+[project.scripts]
+preply = "preply_cli.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "preply_cli.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

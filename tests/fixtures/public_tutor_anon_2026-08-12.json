@@ -1,0 +1,299 @@
+{
+ "props": {
+  "pageProps": {
+   "reviewDistribution": {
+    "nr1Stars": 0,
+    "nr2Stars": 0,
+    "nr3Stars": 0,
+    "nr4Stars": 0,
+    "nr5Stars": 10
+   },
+   "reviews": [
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-07-30T06:16:32.158414+00:00",
+     "id": 2838080,
+     "language": "en",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-08-04T02:04:59.187254+00:00",
+       "language": "en",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-06-03T12:00:00+00:00",
+      "learningGoal": null,
+      "lessonCount": 10
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 1"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-07-27T15:37:53.202118+00:00",
+     "id": 2830033,
+     "language": "zh",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-08-04T02:07:24.625999+00:00",
+       "language": null,
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-07-27T14:00:00+00:00",
+      "learningGoal": "career",
+      "lessonCount": 33
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 2"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-06-25T21:56:24.461016+00:00",
+     "id": 2746286,
+     "language": "en",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-06-26T06:12:16.466781+00:00",
+       "language": "en",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-08-07T00:00:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 35
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 3"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-05-02T04:53:56.440723+00:00",
+     "id": 2596459,
+     "language": "ko",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-05-06T03:05:11.513196+00:00",
+       "language": "ko",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-04-30T13:30:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 16
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 4"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-05-01T15:36:51.068666+00:00",
+     "id": 2595376,
+     "language": "en",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-05-06T03:03:49.391388+00:00",
+       "language": "en",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-05-28T14:30:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 13
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 5"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-03-07T00:05:55.581720+00:00",
+     "id": 2437978,
+     "language": "en",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-03-09T12:11:35.387491+00:00",
+       "language": "en",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-08-07T23:30:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 27
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 6"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2026-02-22T10:53:23.268347+00:00",
+     "id": 2399724,
+     "language": "zh",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2026-02-24T13:53:44.492492+00:00",
+       "language": "zh",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-08-09T04:00:00+00:00",
+      "learningGoal": "career",
+      "lessonCount": 62
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 7"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2025-11-27T01:46:08.551132+00:00",
+     "id": 2179932,
+     "language": "ko",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2025-11-27T11:31:24.117058+00:00",
+       "language": "zh",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-08-11T14:00:00+00:00",
+      "learningGoal": null,
+      "lessonCount": 67
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 8"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2025-10-21T02:25:43.536786+00:00",
+     "id": 2080864,
+     "language": "ja",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2025-10-22T14:51:54.997486+00:00",
+       "language": "ja",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2025-11-24T23:30:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 7
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 9"
+     }
+    },
+    {
+     "content": "Lessons are well prepared and the pace suits me. Clear explanations and steady progress over time.",
+     "created": "2025-09-10T13:40:29.978372+00:00",
+     "id": 1974132,
+     "language": "ko",
+     "replies": [
+      {
+       "content": "Thank you for the kind words.",
+       "created": "2025-09-10T13:44:30.475459+00:00",
+       "language": "ko",
+       "user": null
+      }
+     ],
+     "reviewerInfo": {
+      "lastLessonAt": "2026-08-04T13:00:00+00:00",
+      "learningGoal": "hobbies",
+      "lessonCount": 49
+     },
+     "score": 5,
+     "tags": [],
+     "user": {
+      "firstName": "Reviewer 10"
+     }
+    }
+   ],
+   "tutor": {
+    "activeStudentsCount": 11,
+    "averageScore": 5,
+    "fullName": "Example Tutor",
+    "headline": "Example headline for a language tutor",
+    "id": 1000001,
+    "numberReviews": 10,
+    "publicUrl": "https://preply.com/en/tutor/1000001",
+    "reviewsSummary": "Students say Vy tailors lessons to their needs, explains grammar and pronunciation clearly, and keeps classes fun with real-life Vietnamese practice.",
+    "subcategoriesRatings": {
+     "ratings": [
+      {
+       "name": "Reassurance",
+       "rating": "5.0",
+       "type": "SUPPORT"
+      },
+      {
+       "name": "Clarity",
+       "rating": "5.0",
+       "type": "CLARITY"
+      },
+      {
+       "name": "Progress",
+       "rating": "4.9",
+       "type": "IMPACT"
+      },
+      {
+       "name": "Preparation",
+       "rating": "4.9",
+       "type": "PREPARATION"
+      }
+     ],
+     "reviewedLessonsCount": 19
+    },
+    "totalLessons": 517,
+    "yearsOfExperience": 2
+   },
+   "tutorSummary": {
+    "strengths": "Vy has 2 years of experience teaching Vietnamese to learners of all levels, including beginners and advanced students. She has taught a total of 7 lessons, showing her commitment and engagement.",
+    "studentsFeedback": "",
+    "teachingStyle": "She tailors her lessons to suit varying proficiency levels, ensuring an interactive and supportive learning environment for all her students.",
+    "tutorSummaryId": 198313,
+    "userLearningGoal": null
+   }
+  }
+ }
+}

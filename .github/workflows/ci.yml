@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.14 is included deliberately: it is what the maintainer's machine
+        # runs, so leaving it untested would mean CI never exercises the only
+        # interpreter the tool is known to be used on.
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      # Install the built package, not the source tree: `discover` then imports
+      # the artifact a user would actually get, so a packaging mistake (a module
+      # missing from the wheel) fails here instead of after release.
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install .
+
+      - name: Smoke the entry point
+        run: |
+          preply --version
+          preply --help > /dev/null
+
+      # The suite must not reach Preply, 1Password, or Chrome. Point the bridge
+      # at a path that cannot exist and strip the browser transport's helper, so
+      # a test that quietly depends on this machine's credentials fails in CI
+      # rather than passing for the wrong reason.
+      - name: Run tests (hermetic)
+        env:
+          PREPLY_OP_BRIDGE_DIR: /nonexistent/preply-ci-bridge
+          PREPLY_OP_VAULT: nonexistent-ci-vault
+        run: |
+          python -m unittest discover -s tests -v 2>&1 | tee test-output.txt
+          # A green exit code proves nothing if the run examined zero tests.
+          # Assert the denominator, not just the status.
+          count=$(grep -oE '^Ran ([0-9]+) tests?' test-output.txt | grep -oE '[0-9]+')
+          echo "collected: ${count:-0} tests"
+          if [ -z "$count" ] || [ "$count" -lt 100 ]; then
+            echo "::error::Expected at least 100 tests, the run reported '${count:-none}'."
+            exit 1
+          fi
+        shell: bash
+
+  package:
+    name: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+
+      - name: Check metadata renders
+        run: python -m twine check dist/*
+
+      # A user who only wants the public `tutor-reviews` command should not be
+      # forced through a heavyweight build. Prove the wheel installs on its own.
+      - name: Install the wheel in a clean environment
+        run: |
+          python -m venv /tmp/fresh
+          /tmp/fresh/bin/python -m pip install --upgrade pip
+          /tmp/fresh/bin/python -m pip install dist/*.whl
+          /tmp/fresh/bin/preply --version
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
