@@ -31,7 +31,7 @@ def _tutor_review_rows(data: dict[str, Any], limit: int | None = None) -> list[d
 
 
 def cmd_tutor_reviews(args: argparse.Namespace) -> None:
-    data = load_tutor_profile(args.source, timeout=args.timeout)
+    data = load_tutor_profile(args.source, timeout=args.timeout, proxy=getattr(args, "proxy", None))
     rows = _tutor_review_rows(data, limit=args.limit)
     if getattr(args, "json", False):
         _print_json(data)

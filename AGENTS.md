@@ -30,8 +30,11 @@ tutor operations cannot be (no tutor session exists).
 ```
 queries/   _operation.py  shared.py  tutor.py  learner.py
 analysis/  _common.py     tutor_views.py  learner_views.py  chat_views.py
-cli/       _shared.py     tutor_cmds.py   learner_cmds.py   chat_cmds.py  review_cmds.py
+cli/       _shared.py     tutor_cmds.py   learner_cmds.py   chat_cmds.py  review_cmds.py  schedule_cmds.py
            __init__.py  <- parser, main(), session commands, the gated mutation
+transport.py         <- resilient public HTTP/GraphQL transport with proxy resolution & Chrome headers
+public_profile.py    <- Next.js hydration payload extractor for tutor profiles & reviews
+public_schedule.py   <- BookingTimeslots GraphQL executor, timeslot normalization & night class analysis
 ```
 
 `queries/__init__.py` and `analysis/__init__.py` re-export flat, so the public

@@ -43,6 +43,7 @@ from .learner_cmds import (
     cmd_upcoming,
 )
 from .review_cmds import cmd_tutor_reviews
+from .schedule_cmds import cmd_tutor_schedule
 from .tutor_cmds import (
     cmd_account,
     cmd_analyze,
@@ -395,9 +396,27 @@ def build_parser() -> argparse.ArgumentParser:
     tutor_reviews.add_argument("source", help="Preply tutor URL, tutor id, or saved public profile HTML/JSON file.")
     tutor_reviews.add_argument("--limit", type=_count, help="Number of review rows to print. Defaults to all reviews.")
     tutor_reviews.add_argument("--timeout", type=int, default=30, help="Network timeout in seconds for public profile fetch.")
+    tutor_reviews.add_argument("--proxy", help="HTTP/HTTPS proxy URL to route through if direct fetch is restricted.")
     tutor_reviews.add_argument("--json", action="store_true")
     tutor_reviews.add_argument("--csv", action="store_true", help="Format review rows as CSV.")
     tutor_reviews.set_defaults(func=cmd_tutor_reviews)
+
+    tutor_schedule = sub.add_parser(
+        "tutor-schedule",
+        help="Inspect public booking schedule, available slots, and booked classes for any tutor.",
+    )
+    tutor_schedule.add_argument("source", nargs="?", default="", help="Preply tutor URL, tutor id, or saved schedule JSON file.")
+    tutor_schedule.add_argument("-f", "--file", help="Path to a saved schedule JSON file to run offline.")
+    tutor_schedule.add_argument("--date", help="Start date in YYYY-MM-DD format (defaults to today in selected timezone).")
+    tutor_schedule.add_argument("--days", type=_count, default=7, help="Number of days to inspect (default: 7).")
+    tutor_schedule.add_argument("--timezone", "--tz", dest="timezone", help="Timezone name for schedule display (default: Asia/Ho_Chi_Minh).")
+    tutor_schedule.add_argument("--duration", type=int, default=50, help="Lesson duration in minutes (default: 50).")
+    tutor_schedule.add_argument("--no-booked", action="store_true", help="Only show free booking slots, hiding booked lessons.")
+    tutor_schedule.add_argument("--proxy", help="HTTP/HTTPS proxy URL to route through if direct fetch is restricted.")
+    tutor_schedule.add_argument("--timeout", type=int, default=30, help="Network timeout in seconds.")
+    tutor_schedule.add_argument("--json", action="store_true")
+    tutor_schedule.add_argument("--csv", action="store_true", help="Format timeslot rows as CSV.")
+    tutor_schedule.set_defaults(func=cmd_tutor_schedule)
 
     student = sub.add_parser("student", help="Show per-student statistics, lessons, and revenue history by tutoring id.")
     student.add_argument("tutoring_id", type=int)

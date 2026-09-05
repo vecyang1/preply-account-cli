@@ -191,4 +191,50 @@ OPERATIONS: dict[str, GraphQLOperation] = {
         }
         """,
     ),
+    "BookingTimeslots": GraphQLOperation(
+        "BookingTimeslots",
+        """
+        query BookingTimeslots(
+            $tutorId: Int!
+            $dateStart: Date!
+            $dateEnd: Date!
+            $tzname: String!
+            $showBooked: Boolean!
+            $durationHours: Float
+        ) {
+            tutor(id: $tutorId) {
+                id
+                timeslotsForBooking(
+                    dateStart: $dateStart
+                    dateEnd: $dateEnd
+                    tzname: $tzname
+                    showBusy: true
+                    showBooked: $showBooked
+                    durationHours: $durationHours
+                ) {
+                    dateStart
+                    dateEnd
+                    type
+                    bookedTimeslotUserInitials
+                }
+                bookingWindowInterval
+            }
+        }
+        """,
+    ),
+    "BookingTutor": GraphQLOperation(
+        "BookingTutor",
+        """
+        query BookingTutor($tutorId: Int!) {
+            tutor(id: $tutorId) {
+                id
+                isVisibleOnSearch
+                hasAvailability
+                averageScore
+                numberReviews
+            }
+        }
+        """,
+    ),
 }
+

@@ -18,10 +18,11 @@ This is an unofficial community tool. Use it only with accounts you own or are a
 
 Be aware of this up front rather than three commands in:
 
-- **Only `tutor-reviews` works with no setup at all.** It reads any tutor's
-  public profile page, needs no login, and runs on any platform. Everything
-  else needs a logged-in Preply session, which means one of the two transports
-  below.
+- **Only `tutor-reviews` and `tutor-schedule` work with no setup at all.** They
+  read any tutor's public profile and public booking calendar via GraphQL, need
+  no login, and run on any platform. Both support `--proxy` and auto-proxy fallback.
+  Everything else needs a logged-in Preply session, which means one of the two
+  transports below.
 - **`direct` needs 1Password plus a Service Account bridge** (`bridge_router`)
   that is *not* shipped with this package. Point `PREPLY_OP_BRIDGE_DIR` at your
   own bridge's scripts directory, or use the browser transport. `PREPLY_OP_VAULT`
@@ -140,8 +141,10 @@ preply compare data/learner.json data/tutor.json
   lessons taken, and subscription (refill) state, sorted by lessons taken.
 - `stats`: learner lifetime stats — highest lesson streak, lessons completed, practices.
 - `confirmation`: show the pending "Did your lesson happen?" prompt. Add `--confirm --yes` to confirm the pending lesson so the tutor can get paid. Use `--lesson-id`, `--expect-tutor`, or `--expect-datetime` as safety guards.
-- `tutor-reviews <url-or-id>`: public tutor profile stats, review reasoning, themes, retention, and all reviews by default. Add `--limit 5` to preview only a few rows. Needs no login — it reads the server-rendered profile page of *any* tutor.
+- `tutor-reviews <url-or-id>`: public tutor profile stats, review reasoning, themes, retention, and all reviews by default. Add `--limit 5` to preview only a few rows. Needs no login — it reads the server-rendered profile page of *any* tutor. Supports `--proxy <url>` for restricted networks.
   - Each review carries the reviewer's own lesson count and the date of their last lesson, so the output includes a **Long-term students** table: who stayed, how many lessons they took, and whether they are still taking them. Reviewers are self-selected, so read it as a floor on repeat business, not a census.
+- `tutor-schedule <url-or-id>`: public tutor calendar and booking availability via GraphQL (`BookingTimeslots`). Needs no login. Shows booked lessons, free booking slots, student initials, earliest/latest lesson windows, and night-class schedule (18:00 cutoff).
+  - Flags: `--date YYYY-MM-DD` (start date, default today), `--days N` (default 7), `--timezone` (default `Asia/Ho_Chi_Minh`), `--duration` (minutes, default 50), `--no-booked` (hide booked slots), `--proxy <url>`, `--json`, `--csv`, `-f <saved_json>`.
 - `student <tutoring_id>`: per-student details, statistics, upcoming lessons, past lessons, and revenue history.
 - `analyze`: summary plus timeline. Add `--deep` for per-student past lesson fetching.
 - `snapshot`: local JSON snapshot for later comparison.

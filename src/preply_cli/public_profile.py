@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener, urlopen
 
 
 class PublicProfileError(RuntimeError):
@@ -349,25 +350,30 @@ def _source_url(source: str) -> str:
     return source
 
 
-def fetch_tutor_profile(source: str, timeout: int = 30) -> dict[str, Any]:
+def fetch_tutor_profile(source: str, timeout: int = 30, proxy: str | None = None) -> dict[str, Any]:
     from . import __version__
+    from .transport import resolve_proxy_url
 
     url = _source_url(source)
+    resolved_proxy = resolve_proxy_url(proxy)
+
     request = Request(
         url,
         headers={
-            # Read the version rather than repeating it: the literal here said
-            # 0.3 for five releases.
             "User-Agent": f"Mozilla/5.0 (compatible; preply-account-cli/{__version__}; +https://preply.com)",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         },
     )
-    # urllib raises HTTPError/URLError, which are not in main()'s catch list and
-    # escaped as tracebacks at exit 1. A mistyped tutor id is a 404, which is an
-    # ordinary user mistake and deserves an ordinary error.
+    custom_proxy = proxy or os.environ.get("PREPLY_PROXY_URL") or os.environ.get("DATAIMPULSE_PROXY_URL")
     try:
-        with urlopen(request, timeout=timeout) as response:
-            html = response.read().decode("utf-8")
+        if custom_proxy:
+            resolved_proxy = resolve_proxy_url(custom_proxy)
+            opener = build_opener(ProxyHandler({"http": resolved_proxy, "https": resolved_proxy}))
+            with opener.open(request, timeout=timeout) as response:
+                html = response.read().decode("utf-8")
+        else:
+            with urlopen(request, timeout=timeout) as response:
+                html = response.read().decode("utf-8")
     except HTTPError as exc:
         if exc.code == 404:
             raise PublicProfileError(
@@ -393,14 +399,14 @@ def _looks_like_host(source: str) -> bool:
     return "." in head and " " not in head and not head.startswith(".")
 
 
-def load_tutor_profile(source: str, timeout: int = 30) -> dict[str, Any]:
+def load_tutor_profile(source: str, timeout: int = 30, proxy: str | None = None) -> dict[str, Any]:
     if source.startswith(("http://", "https://")) or source.isdigit():
-        return fetch_tutor_profile(source, timeout=timeout)
+        return fetch_tutor_profile(source, timeout=timeout, proxy=proxy)
     # A scheme-less URL ("preply.com/en/tutor/123") is a URL the user forgot to
     # prefix, not a filename. Treating it as a path produced a FileNotFoundError
     # naming a nonsensical path under the current directory.
     if "/" in source and not Path(source).expanduser().exists() and _looks_like_host(source):
-        return fetch_tutor_profile(f"https://{source}", timeout=timeout)
+        return fetch_tutor_profile(f"https://{source}", timeout=timeout, proxy=proxy)
     path = Path(source).expanduser().resolve()
     try:
         text = path.read_text(encoding="utf-8")

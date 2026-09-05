@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.10.0 - 2026-09-05
+
+### New: public tutor schedule & booking calendar (`tutor-schedule`)
+
+- `preply tutor-schedule <url-or-id>`: inspect public booking timeslots, booked
+  lessons, open slots, and daily schedule windows via GraphQL (`BookingTimeslots`).
+  Needs no login and no stored session.
+- Computes comprehensive aggregate summaries:
+  - Total timeslots, booked slots, free slots.
+  - Daily breakdown: earliest lesson start, latest lesson end, active window.
+  - Night class detection with configurable cutoff (default 18:00 / 6 PM).
+- Output options: structured multi-table view, `--json`, and `--csv`.
+- Offline support: `-f/--file <saved_json>` for local replay and offline testing.
+
+### Resilient Public Transport & Anti-Bot Egress
+
+- Added `transport.py`: unified public transport with Chrome header impersonation
+  (`User-Agent`, `Sec-Ch-Ua`, `Sec-Fetch-*`), eliminating Cloudflare 403 challenge
+  blocks on public requests.
+- Integrated transparent proxy resolution:
+  - `--proxy <url>` CLI flag on both `tutor-schedule` and `tutor-reviews`.
+  - Environment variable fallback: `PREPLY_PROXY_URL` -> `PREPLY_TRACKER_PROXY_URL` ->
+    `DATAIMPULSE_PROXY_URL` -> `HTTPS_PROXY` -> `HTTP_PROXY`.
+  - Auto-fallback on Cloudflare challenge (403/429): retries through proxy if
+    direct request is challenged.
+- Fixed `tutor-reviews` egress: replaced bare urllib request with resilient transport
+  so public tutor review analysis no longer gets blocked on residential IPs.
+
 ## 0.9.0 - 2026-08-14
 
 ### New: what Preply is about to charge you
