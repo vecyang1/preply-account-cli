@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.1 - 2026-09-06
+
+### Documentation & Semantic Clarification: Public Schedule vs Live Reality
+
+- Clarified `tutor-schedule` data semantics in `README.md` and `AGENTS.md`:
+  - Preply's unauthenticated public `BookingTimeslots` endpoint returns exclusively open booking slots (`type: FREE`). Booked slots are either pruned from the public calendar or withheld for privacy.
+  - Offline test fixtures (`data/tutor-schedule-sample.json`) retain `BOOKED` slot structures with student initials for schema validation and unit testing; they must not be conflated with live public API output.
+  - Clarified the three distinct time horizons across Preply surfaces: past completed lessons (reviews), recent operational velocity (`lessonsBookedLast48h`), and upcoming public availability (`timeslotsForBooking`).
+
 ## 0.10.0 - 2026-09-05
 
 ### New: public tutor schedule & booking calendar (`tutor-schedule`)

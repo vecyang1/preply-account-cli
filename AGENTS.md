@@ -216,3 +216,11 @@ To (re)capture a session while present in Chrome: `preply session capture`
 - **Snapshot Freshness**: An offline snapshot is a dated readback, not live Preply state. A failed browser-harness handshake narrows the live-route proof; it does not prove that Preply lacks an API or that the snapshot is current.
 - **Public Profile Payloads**: Tutor profile pages expose a Next.js `__NEXT_DATA__` payload with `tutor`, `reviews`, `reviewDistribution`, and `tutorSummary`. Prefer that structured payload over visible-text scraping for public review work.
 - **Confirmation Modal Payloads**: Learner home exposes `myNextLessonForConfirmation` and the modal buttons have stable `data-qa-id` values, but the CLI should prefer the GraphQL query/mutation over DOM clicking.
+- **Public Schedule Semantics (`tutor-schedule` vs Live Reality)**:
+  - **`BookingTimeslots` on unauthenticated public endpoints returns exclusively open booking slots (`type: FREE`)**. When a slot is booked by a student, Preply either prunes the timeslot from the public response or withholds the occupied interval for privacy. `BOOKED` slots with student initials (e.g. `bookedTimeslotUserInitials`) exist in offline test fixtures (`data/tutor-schedule-sample.json`) and internal/authenticated views, NOT in unauthenticated public fetches.
+  - **Never confuse offline test fixtures with live network reality** (per `starting-with-readiness`: "没人跑的检查不算证据"). Running a test against a synthetic JSON file verifies the parser contract; it does not constitute proof that the production API returns booked records.
+  - **Distinguish Three Preply Time Horizons**:
+    1. *Past Completed Lessons*: Extracted from `tutor-reviews` timestamps (e.g. "student Alex had a lesson on 2026-09-04").
+    2. *Recent Operational Velocity*: `lessonsBookedLast48h` on the public profile payload (bookings created in the past 48 hours).
+    3. *Upcoming Availability*: `timeslotsForBooking` from `tutor-schedule` (open slots across the next N days). A tutor with recent reviews and `lessonsBookedLast48h: 4` can legitimately show `booked: 0` and `free: 128` on future dates if their upcoming availability is fully open and unreserved.
+
