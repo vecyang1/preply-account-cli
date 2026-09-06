@@ -70,7 +70,10 @@ def cmd_tutor_schedule(args: argparse.Namespace) -> None:
     if not source:
         raise PublicScheduleError("Must specify tutor ID, profile URL, or a snapshot file path (-f).")
 
-    dur_hours = (args.duration / 60.0) if getattr(args, "duration", None) else DEFAULT_DURATION_HOURS
+    if getattr(args, "duration", None):
+        dur_hours = 0.5 if args.duration <= 30 else 1.0
+    else:
+        dur_hours = DEFAULT_DURATION_HOURS
     show_booked = not getattr(args, "no_booked", False)
     tzname = getattr(args, "timezone", None) or getattr(args, "tz", None) or DEFAULT_TIMEZONE
     proxy = getattr(args, "proxy", None)

@@ -164,6 +164,30 @@ class TutorScheduleParsingAndSummaryTests(unittest.TestCase):
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
+    def test_utc_aware_timestamps_converted_to_local_tz(self):
+        # 12:30 UTC + 7h (Asia/Ho_Chi_Minh) = 19:30 Vietnam time
+        payload = {
+            "tutor": {
+                "id": 3602540,
+                "bookingWindowInterval": 180,
+                "timeslotsForBooking": [
+                    {
+                        "dateStart": "2026-09-06T12:30:00+00:00",
+                        "dateEnd": "2026-09-06T13:30:00+00:00",
+                        "type": "FREE",
+                        "bookedTimeslotUserInitials": None,
+                    }
+                ],
+            }
+        }
+        res = parse_tutor_schedule(payload, "2026-09-06", "2026-09-07", "Asia/Ho_Chi_Minh")
+        slot = res["slots"][0]
+        self.assertEqual(slot["date"], "2026-09-06")
+        self.assertEqual(slot["start_time"], "19:30")
+        self.assertEqual(slot["end_time"], "20:30")
+        self.assertTrue(slot["is_night"])
+
+
 
 class TutorScheduleCliCommandTests(unittest.TestCase):
     def setUp(self):

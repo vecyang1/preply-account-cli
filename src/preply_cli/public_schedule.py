@@ -18,7 +18,7 @@ from .queries import get_operation
 from .transport import PreplyTransportError, post_public_graphql
 
 DEFAULT_TIMEZONE = "Asia/Ho_Chi_Minh"
-DEFAULT_DURATION_HOURS = 0.8333333333333334  # 50 minutes (Preply standard)
+DEFAULT_DURATION_HOURS = 1.0  # 1-hour slot (Preply backend accepts 1.0 or 0.5)
 NIGHT_CUTOFF_HOUR = 18  # Evening classes start at or after 18:00 (6 PM)
 
 
@@ -54,18 +54,34 @@ def extract_tutor_id(source: str) -> int:
     )
 
 
-def _format_time(dt_str: str) -> str:
-    """Extract HH:MM from ISO datetime string."""
+def _to_local_dt(dt_str: str, tzname: str) -> datetime | None:
     if not dt_str:
-        return ""
+        return None
+    try:
+        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            return dt
+        return dt.astimezone(ZoneInfo(tzname))
+    except Exception:
+        return None
+
+
+def _format_time(dt_str: str, tzname: str = DEFAULT_TIMEZONE) -> str:
+    """Extract HH:MM from ISO datetime string, converted to target timezone."""
+    loc = _to_local_dt(dt_str, tzname)
+    if loc:
+        return loc.strftime("%H:%M")
     if "T" in dt_str:
         time_part = dt_str.split("T")[1]
         return time_part[:5]
     return dt_str
 
 
-def _parse_iso_date(dt_str: str) -> str:
-    """Extract YYYY-MM-DD from ISO datetime string."""
+def _parse_iso_date(dt_str: str, tzname: str = DEFAULT_TIMEZONE) -> str:
+    """Extract YYYY-MM-DD from ISO datetime string, converted to target timezone."""
+    loc = _to_local_dt(dt_str, tzname)
+    if loc:
+        return loc.strftime("%Y-%m-%d")
     if not dt_str:
         return ""
     return dt_str.split("T")[0][:10]
@@ -99,9 +115,9 @@ def build_schedule_summary(
 
     for slot in slots:
         slot_type = (slot.get("type") or "UNKNOWN").upper()
-        s_date = slot.get("date") or _parse_iso_date(slot.get("dateStart", ""))
-        s_time = slot.get("start_time") or _format_time(slot.get("dateStart", ""))
-        e_time = slot.get("end_time") or _format_time(slot.get("dateEnd", ""))
+        s_date = slot.get("date") or _parse_iso_date(slot.get("dateStart", ""), tzname)
+        s_time = slot.get("start_time") or _format_time(slot.get("dateStart", ""), tzname)
+        e_time = slot.get("end_time") or _format_time(slot.get("dateEnd", ""), tzname)
 
         is_night = False
         if s_time and ":" in s_time:
@@ -190,9 +206,9 @@ def parse_tutor_schedule(
     for raw in raw_slots:
         ds = raw.get("dateStart", "")
         de = raw.get("dateEnd", "")
-        slot_date = _parse_iso_date(ds)
-        start_time = _format_time(ds)
-        end_time = _format_time(de)
+        slot_date = _parse_iso_date(ds, tzname)
+        start_time = _format_time(ds, tzname)
+        end_time = _format_time(de, tzname)
         slot_type = (raw.get("type") or "UNKNOWN").upper()
         initials = raw.get("bookedTimeslotUserInitials")
         duration = _calc_duration_minutes(ds, de)
