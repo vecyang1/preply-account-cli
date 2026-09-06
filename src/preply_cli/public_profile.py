@@ -200,7 +200,13 @@ def _retention(profile: dict[str, Any]) -> dict[str, Any]:
         ),
         "most_recent_reviewer_lesson": last_lesson_dates[-1] if last_lesson_dates else "",
         "earliest_reviewer_lesson": last_lesson_dates[0] if last_lesson_dates else "",
+        "recent_active_students": sorted(
+            (row for row in ranked if row["last_lesson_at"]),
+            key=lambda row: (row["last_lesson_at"], row["lessons"] or 0),
+            reverse=True,
+        ),
     }
+
 
 
 def _drift_warnings(profile: dict[str, Any]) -> list[str]:
@@ -239,6 +245,8 @@ def parse_tutor_profile_html(html: str, source_url: str = "") -> dict[str, Any]:
             "number_reviews": _int_or_none(tutor.get("numberReviews")),
             "total_lessons": _int_or_none(tutor.get("totalLessons")),
             "active_students_count": _int_or_none(tutor.get("activeStudentsCount")),
+            "lessons_booked_last_48h": _int_or_none(tutor.get("lessonsBookedLast48h")),
+            "is_super_tutor": bool(tutor.get("isSuperTutor")),
             "years_of_experience": _int_or_none(tutor.get("yearsOfExperience")),
             "reviewed_lessons_count": reviewed_lessons_count,
             "reviews_summary": tutor.get("reviewsSummary"),

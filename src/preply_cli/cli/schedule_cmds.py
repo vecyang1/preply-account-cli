@@ -129,7 +129,10 @@ def cmd_tutor_schedule(args: argparse.Namespace) -> None:
 
     print("Schedule Overview")
     print(format_table(meta_rows, ["metric", "value"]))
+    if summary.get("booked_slots", 0) == 0:
+        print("(Note: Public BookingTimeslots lists open available slots; booked slots are withheld by Preply for student privacy.)")
     print()
+
 
     if daily:
         print("Daily Breakdown")

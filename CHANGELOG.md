@@ -2,12 +2,19 @@
 
 ## 0.10.1 - 2026-09-06
 
-### Documentation & Semantic Clarification: Public Schedule vs Live Reality
+### Enhanced: Public Tutor Profile Velocity & Recent Student Lessons
 
-- Clarified `tutor-schedule` data semantics in `README.md` and `AGENTS.md`:
-  - Preply's unauthenticated public `BookingTimeslots` endpoint returns exclusively open booking slots (`type: FREE`). Booked slots are either pruned from the public calendar or withheld for privacy.
-  - Offline test fixtures (`data/tutor-schedule-sample.json`) retain `BOOKED` slot structures with student initials for schema validation and unit testing; they must not be conflated with live public API output.
-  - Clarified the three distinct time horizons across Preply surfaces: past completed lessons (reviews), recent operational velocity (`lessonsBookedLast48h`), and upcoming public availability (`timeslotsForBooking`).
+- `preply tutor-reviews <url-or-id>`:
+  - Extracted and surfaced `lessons_booked_last_48h`, `active_students`, `is_super_tutor`, and `latest_student_lesson` in the Tutor Overview table.
+  - Added a dedicated table **`Recent student lessons (top 5 by last lesson date)`**, dynamically ranking students by their most recent lesson date (`reviewer_last_lesson_at`) and lesson count. Eliminates ad-hoc scripting for determining tutor teaching recency.
+- `preply tutor-schedule <url-or-id>`:
+  - Added an explanatory note under the Schedule Overview when `booked_slots == 0`, clarifying that Preply's public `BookingTimeslots` API only returns open available slots (`FREE`) and withholds booked slots for privacy.
+- Documentation & Semantic Clarification:
+  - Clarified `tutor-schedule` data semantics in `README.md` and `AGENTS.md`:
+    - Preply's unauthenticated public `BookingTimeslots` endpoint returns exclusively open booking slots (`type: FREE`). Booked slots are either pruned from the public calendar or withheld for privacy.
+    - Offline test fixtures (`data/tutor-schedule-sample.json`) retain `BOOKED` slot structures with student initials for schema validation and unit testing; they must not be conflated with live public API output.
+    - Clarified the three distinct time horizons across Preply surfaces: past completed lessons (reviews), recent operational velocity (`lessonsBookedLast48h`), and upcoming public availability (`timeslotsForBooking`).
+
 
 ## 0.10.0 - 2026-09-05
 

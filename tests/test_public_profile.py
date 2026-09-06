@@ -43,6 +43,9 @@ class PublicProfileTests(unittest.TestCase):
                     "fullName": "Andres R.",
                     "headline": "More than 10 years of experience teaching Guitar",
                     "totalLessons": 2680,
+                    "activeStudentsCount": 18,
+                    "lessonsBookedLast48h": 5,
+                    "isSuperTutor": True,
                     "numberReviews": 56,
                     "averageScore": 5,
                     "publicUrl": "https://preply.com/en/tutor/2807691",
@@ -83,6 +86,9 @@ class PublicProfileTests(unittest.TestCase):
 
         self.assertEqual(profile["tutor"]["name"], "Andres R.")
         self.assertEqual(profile["tutor"]["total_lessons"], 2680)
+        self.assertEqual(profile["tutor"]["active_students_count"], 18)
+        self.assertEqual(profile["tutor"]["lessons_booked_last_48h"], 5)
+        self.assertTrue(profile["tutor"]["is_super_tutor"])
         self.assertEqual(profile["tutor"]["number_reviews"], 56)
         self.assertEqual(profile["tutor"]["reviewed_lessons_count"], 105)
         self.assertEqual(profile["review_distribution"]["5"], 56)
@@ -168,6 +174,9 @@ class ReviewerLessonCountContractTests(unittest.TestCase):
         self.assertEqual(retention["lessons_represented_by_reviewers"], 319)
         # 6 of 10 reviewers are at or above the 20-lesson cutoff.
         self.assertEqual(len(retention["long_term_reviewers"]), 6)
+        recent_active = retention["recent_active_students"]
+        self.assertEqual(len(recent_active), 10)
+        self.assertEqual(recent_active[0]["last_lesson_at"], "2026-08-11")
 
     def test_legacy_flat_reviewer_lesson_count_still_parses(self):
         """Captures taken before Preply nested the field must keep working."""

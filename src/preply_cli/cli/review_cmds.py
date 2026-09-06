@@ -54,12 +54,17 @@ def cmd_tutor_reviews(args: argparse.Namespace) -> None:
     analysis = data.get("analysis") or {}
     distribution = data.get("review_distribution") or {}
     tutor_summary = tutor.get("tutor_summary") or {}
+    retention = analysis.get("retention") or {}
     rating_rows = [
         {"metric": "name", "value": tutor.get("name")},
         {"metric": "headline", "value": tutor.get("headline")},
         {"metric": "rating", "value": tutor.get("average_score")},
         {"metric": "public_reviews", "value": tutor.get("number_reviews")},
         {"metric": "total_lessons", "value": tutor.get("total_lessons")},
+        {"metric": "active_students", "value": tutor.get("active_students_count")},
+        {"metric": "lessons_booked_last_48h", "value": tutor.get("lessons_booked_last_48h")},
+        {"metric": "is_super_tutor", "value": "Yes" if tutor.get("is_super_tutor") else "No"},
+        {"metric": "latest_student_lesson", "value": retention.get("most_recent_reviewer_lesson")},
         {"metric": "anonymous_lesson_reviews", "value": tutor.get("reviewed_lessons_count")},
         {"metric": "5_star_reviews", "value": distribution.get("5")},
         {"metric": "recent_review", "value": analysis.get("recent_review_date")},
@@ -89,7 +94,13 @@ def cmd_tutor_reviews(args: argparse.Namespace) -> None:
         print()
         print("Themes")
         print(format_table(theme_rows, ["theme", "hits"]))
-    retention = analysis.get("retention") or {}
+
+    recent_active = retention.get("recent_active_students") or []
+    if recent_active:
+        print()
+        print(f"Recent student lessons (top {min(5, len(recent_active))} by last lesson date)")
+        print(format_table(recent_active[:5], ["reviewer", "lessons", "last_lesson_at", "learning_goal", "review_date"]))
+
     retained = retention.get("long_term_reviewers") or []
     if retained:
         print()
