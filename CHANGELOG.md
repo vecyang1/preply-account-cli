@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.11.0 - 2026-09-06
+
+### New: Tutor Acceptance Status, Overbooked Detection & Pricing Normalization
+
+- `preply tutor-reviews <url-or-id>`:
+  - **Acceptance Status Detection**: Preply SSOT is `isVisibleOnSearch` on the tutor hydration object. When `False`, Preply displays *"Tutor isn’t accepting new students. This can happen when tutors get overbooked."* The CLI now surfaces:
+    - `status` (e.g. `APPROVED`)
+    - `accepting_new_students` (`Yes`, `No (Overbooked/Paused)`, or `Unknown`)
+    - Prominent warning banner when `is_accepting_new_students == False`
+    - Caution note in `Review reasoning -> cautions`
+  - **Pricing Normalization**:
+    - Parsed and displayed `hourly_rate` (e.g. `$7.00 USD`) and `trial_rate` (e.g. `$4 USD`).
+  - Unit and live regression tests covering both accepting and non-accepting tutors (237/237 tests passing).
+
 ## 0.10.1 - 2026-09-06
 
 ### Enhanced: Public Tutor Profile Velocity & Recent Student Lessons

@@ -208,5 +208,64 @@ class ReviewerLessonCountContractTests(unittest.TestCase):
         self.assertIn("reviewerInfo.lessonCount", profile["warnings"][0])
 
 
+class TutorAcceptanceAndPricingTests(unittest.TestCase):
+    def test_accepting_new_students_and_prices_parsed(self):
+        html = _html_with_next_data(
+            {
+                "tutor": {
+                    "id": 5536318,
+                    "fullName": "Active T.",
+                    "status": "ACTIVE",
+                    "isVisibleOnSearch": True,
+                    "hasAvailability": True,
+                    "price": {"value": "14.00", "currency": {"code": "USD"}},
+                    "priceShortTrial": {"value": "7", "currency": {"code": "USD"}},
+                    "totalLessons": 20,
+                    "numberReviews": 2,
+                    "averageScore": 5,
+                },
+                "reviews": [],
+            }
+        )
+        profile = parse_tutor_profile_html(html, "https://preply.com/en/tutor/5536318")
+        tutor = profile["tutor"]
+        self.assertEqual(tutor["status"], "ACTIVE")
+        self.assertTrue(tutor["is_visible_on_search"])
+        self.assertTrue(tutor["is_accepting_new_students"])
+        self.assertEqual(tutor["accepting_new_students_notice"], "")
+        self.assertTrue(tutor["has_availability"])
+        self.assertEqual(tutor["hourly_rate"]["value"], 14.0)
+        self.assertEqual(tutor["hourly_rate"]["formatted"], "$14.00 USD")
+        self.assertEqual(tutor["trial_rate"]["value"], 7.0)
+        self.assertEqual(tutor["trial_rate"]["formatted"], "$7 USD")
+
+    def test_not_accepting_new_students_when_not_visible_on_search(self):
+        html = _html_with_next_data(
+            {
+                "tutor": {
+                    "id": 5536318,
+                    "fullName": "Busy T.",
+                    "status": "ACTIVE",
+                    "isVisibleOnSearch": False,
+                    "hasAvailability": True,
+                    "totalLessons": 300,
+                    "numberReviews": 15,
+                    "averageScore": 5.0,
+                },
+                "reviews": [],
+            }
+        )
+        profile = parse_tutor_profile_html(html, "https://preply.com/en/tutor/5536318")
+        tutor = profile["tutor"]
+        self.assertEqual(tutor["status"], "ACTIVE")
+        self.assertFalse(tutor["is_visible_on_search"])
+        self.assertFalse(tutor["is_accepting_new_students"])
+        self.assertIn("isn’t accepting new students", tutor["accepting_new_students_notice"])
+        self.assertIn(
+            "Tutor isn’t accepting new students (overbooked or temporarily paused).",
+            profile["analysis"]["cautions"],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

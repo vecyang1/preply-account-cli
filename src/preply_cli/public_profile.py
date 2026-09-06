@@ -227,6 +227,20 @@ def _drift_warnings(profile: dict[str, Any]) -> list[str]:
     return warnings
 
 
+def _normalize_price(price_obj: Any) -> dict[str, Any]:
+    if not isinstance(price_obj, dict):
+        return {"value": None, "currency": None, "formatted": None}
+    val = price_obj.get("value")
+    curr_obj = price_obj.get("currency")
+    curr = curr_obj.get("code") if isinstance(curr_obj, dict) else None
+    fmt = f"${val} {curr}" if val and curr else (str(val) if val else None)
+    return {
+        "value": _float_or_none(val),
+        "currency": curr,
+        "formatted": fmt,
+    }
+
+
 def parse_tutor_profile_html(html: str, source_url: str = "") -> dict[str, Any]:
     next_data = extract_next_data(html)
     page_props = ((next_data.get("props") or {}).get("pageProps") or {})
@@ -234,6 +248,17 @@ def parse_tutor_profile_html(html: str, source_url: str = "") -> dict[str, Any]:
     reviewed_lessons_count, subcategory_ratings = _normalize_subcategory_ratings(
         tutor.get("subcategoriesRatings")
     )
+
+    is_visible_on_search = bool(tutor.get("isVisibleOnSearch")) if "isVisibleOnSearch" in tutor else None
+    # Preply SSOT: isVisibleOnSearch controls whether tutor accepts new students
+    is_accepting = is_visible_on_search if is_visible_on_search is not None else True
+    notice = ""
+    if is_accepting is False:
+        notice = "Tutor isn’t accepting new students (overbooked or temporarily paused)"
+
+    hourly_rate = _normalize_price(tutor.get("price"))
+    trial_rate = _normalize_price(tutor.get("priceShortTrial"))
+
     profile = {
         "source_url": source_url or tutor.get("publicUrl") or "",
         "tutor": {
@@ -241,6 +266,13 @@ def parse_tutor_profile_html(html: str, source_url: str = "") -> dict[str, Any]:
             "name": tutor.get("fullName"),
             "headline": tutor.get("headline"),
             "public_url": tutor.get("publicUrl") or source_url,
+            "status": tutor.get("status"),
+            "is_visible_on_search": is_visible_on_search,
+            "is_accepting_new_students": is_accepting,
+            "accepting_new_students_notice": notice,
+            "has_availability": bool(tutor.get("hasAvailability")) if "hasAvailability" in tutor else None,
+            "hourly_rate": hourly_rate,
+            "trial_rate": trial_rate,
             "average_score": _float_or_none(tutor.get("averageScore")),
             "number_reviews": _int_or_none(tutor.get("numberReviews")),
             "total_lessons": _int_or_none(tutor.get("totalLessons")),
@@ -332,6 +364,8 @@ def build_tutor_review_analysis(profile: dict[str, Any]) -> dict[str, Any]:
     else:
         recommendation = "Review evidence is limited; use a trial lesson or compare with more-reviewed tutors."
     cautions: list[str] = []
+    if tutor.get("is_accepting_new_students") is False:
+        cautions.append("Tutor isn’t accepting new students (overbooked or temporarily paused).")
     if negative_count:
         cautions.append(f"{negative_count} public reviews are below 4 stars.")
     if review_count < 10:

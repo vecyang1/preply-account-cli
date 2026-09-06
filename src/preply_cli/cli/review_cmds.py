@@ -55,9 +55,25 @@ def cmd_tutor_reviews(args: argparse.Namespace) -> None:
     distribution = data.get("review_distribution") or {}
     tutor_summary = tutor.get("tutor_summary") or {}
     retention = analysis.get("retention") or {}
+
+    is_accepting = tutor.get("is_accepting_new_students")
+    if is_accepting is True:
+        accepting_str = "Yes"
+    elif is_accepting is False:
+        accepting_str = "No (Overbooked/Paused)"
+    else:
+        accepting_str = "Unknown"
+
+    hourly_rate = (tutor.get("hourly_rate") or {}).get("formatted")
+    trial_rate = (tutor.get("trial_rate") or {}).get("formatted")
+
     rating_rows = [
         {"metric": "name", "value": tutor.get("name")},
         {"metric": "headline", "value": tutor.get("headline")},
+        {"metric": "status", "value": tutor.get("status")},
+        {"metric": "accepting_new_students", "value": accepting_str},
+        {"metric": "hourly_rate", "value": hourly_rate or "-"},
+        {"metric": "trial_rate", "value": trial_rate or "-"},
         {"metric": "rating", "value": tutor.get("average_score")},
         {"metric": "public_reviews", "value": tutor.get("number_reviews")},
         {"metric": "total_lessons", "value": tutor.get("total_lessons")},
@@ -87,6 +103,9 @@ def cmd_tutor_reviews(args: argparse.Namespace) -> None:
     ]
     print("Tutor")
     print(format_table(rating_rows, ["metric", "value"]))
+    if is_accepting is False:
+        print()
+        print("⚠️  Notice: Tutor isn’t accepting new students. (This can happen when tutors get overbooked or temporarily paused.)")
     print()
     print("Review reasoning")
     print(format_table(reasoning_rows, ["metric", "value"]))
