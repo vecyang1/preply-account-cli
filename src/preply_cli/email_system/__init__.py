@@ -17,6 +17,7 @@ from .contracts import (
     CadenceType,
     DigestConfig,
     DigestResult,
+    DigestRunResult,
     EmailCategory,
     EmailRecord,
     Language,
@@ -31,12 +32,15 @@ from .crm_sync import CRMPushResult, FluentCRMSync
 from .drafter import EmailDrafter
 from .renderer import XinChaoViEmailRenderer
 from .scanner import PreplyEmailScanner
+from .scheduler import DigestAutomationRunner
 
 __all__ = [
     "CRMPushResult",
     "CadenceType",
+    "DigestAutomationRunner",
     "DigestConfig",
     "DigestResult",
+    "DigestRunResult",
     "EmailCategory",
     "EmailDrafter",
     "EmailRecord",

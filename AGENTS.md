@@ -250,6 +250,8 @@ Engineered a complete, production-grade periodic email notification and motivati
    - Published live templates: IDs `2733` (Learner ZH), `2734` (Tutor ZH), `2735` (Learner EN), `2736` (Tutor EN), `2737` (Learner VI), `2738` (Tutor VI).
 
 ### Commands:
+- `preply digest run [--role learner|tutor|both] [--lang zh-CN|en|vi] [--draft] [--push-crm] [--dry-run]` (One-command automated execution)
+- `preply digest cron [--role both] [--schedule "0 9 * * 1"] [--install]` (Crontab entry generation)
 - `preply digest scan [--live] [--save data/events.json] [--in-file path]`
 - `preply digest calculate [--role learner|tutor] [--json]`
 - `preply digest generate [--role learner|tutor] [--lang en|zh-CN|vi] [--out file.html]`
@@ -257,3 +259,9 @@ Engineered a complete, production-grade periodic email notification and motivati
 - `preply digest preview [--role learner|tutor] [--lang zh-CN]`
 - `preply digest verify` (mathematical & psychological invariant checks)
 - `preply digest push-crm [--site xinchaovi.com] [--role learner|tutor|all] [--lang zh-CN|en|vi] [--dry-run]`
+
+### Cross-Client Email Hardening (v0.13.0):
+- Microsoft Outlook Windows MSO tables (`<!--[if (gte mso 9)|(IE)]>`) and VML CTA roundrect buttons (`<v:roundrect>`).
+- Solid background color fallbacks for gradient layers.
+- Mobile responsive stylesheet (`@media only screen and (max-width: 620px)`) and dark mode support (`@media (prefers-color-scheme: dark)`).
+- Complete test suite: 267/267 tests passing.

@@ -19,8 +19,10 @@ from typing import Any
 
 from ..email_system import (
     CadenceType,
+    DigestAutomationRunner,
     DigestConfig,
     DigestResult,
+    DigestRunResult,
     EmailCategory,
     EmailDrafter,
     FluentCRMSync,
@@ -398,9 +400,71 @@ def cmd_digest_push_crm(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_digest_run(args: argparse.Namespace) -> int:
+    """Run end-to-end automated digest pipeline for learner, tutor, or both."""
+    role_map = {"learner": UserRole.LEARNER, "tutor": UserRole.TUTOR, "both": UserRole.BOTH}
+    role = role_map.get(getattr(args, "role", "both"), UserRole.BOTH)
+    lang_map = {"en": Language.EN, "zh-CN": Language.ZH, "vi": Language.VI}
+    lang = lang_map.get(getattr(args, "lang", "zh-CN"), Language.ZH)
+
+    results = DigestAutomationRunner.run_pipeline(
+        role=role,
+        language=lang,
+        in_file=getattr(args, "in_file", None),
+        spark_draft=getattr(args, "draft", False),
+        push_crm=getattr(args, "push_crm", False),
+        crm_site=getattr(args, "site", "xinchaovi.com"),
+        dry_run=getattr(args, "dry_run", False),
+        out_dir=getattr(args, "out_dir", None),
+        recipient_override=getattr(args, "to", None),
+    )
+
+    if getattr(args, "json", False):
+        _print_json([r.to_dict() for r in results])
+        return 0
+
+    rows = []
+    for r in results:
+        rows.append({
+            "Role": r.role.value.capitalize(),
+            "Recipient": r.recipient,
+            "Subject": r.subject[:36] + "..." if len(r.subject) > 36 else r.subject,
+            "HTML Artifact": Path(r.generated_html_path).name,
+            "Spark Draft": str(r.spark_draft_id or "N/A"),
+            "CRM Template": str(r.crm_template_id or "N/A"),
+            "Status": "OK" if r.success else "FAILED",
+        })
+
+    _log(format_table(rows, ["Role", "Recipient", "Subject", "HTML Artifact", "Spark Draft", "CRM Template", "Status"]))
+    return 0 if all(r.success for r in results) else 1
+
+
+def cmd_digest_cron(args: argparse.Namespace) -> int:
+    """Generate bulletproof crontab snippet for scheduled weekly execution."""
+    role_map = {"learner": UserRole.LEARNER, "tutor": UserRole.TUTOR, "both": UserRole.BOTH}
+    role = role_map.get(getattr(args, "role", "both"), UserRole.BOTH)
+    lang_map = {"en": Language.EN, "zh-CN": Language.ZH, "vi": Language.VI}
+    lang = lang_map.get(getattr(args, "lang", "zh-CN"), Language.ZH)
+
+    cron_str = DigestAutomationRunner.generate_cron_entry(
+        python_bin=getattr(args, "python", None),
+        role=role,
+        language=lang,
+        draft=getattr(args, "draft", True),
+        push_crm=getattr(args, "push_crm", True),
+        schedule_expression=getattr(args, "schedule", "0 9 * * 1"),
+    )
+
+    if getattr(args, "install", False):
+        _log("⚠️  Please install this entry into your crontab using: crontab -e")
+        _log("Crontab entry:")
+    _log(cron_str)
+    return 0
+
+
 def cmd_digest(args: argparse.Namespace) -> int:
     """Default handler for preply digest when invoked directly."""
-    _log("Usage: preply digest {scan,calculate,generate,draft,preview,verify,push-crm} [options]")
+    _log("Usage: preply digest {run,cron,scan,calculate,generate,draft,preview,verify,push-crm} [options]")
     _log("Run 'preply digest --help' for details on each subcommand.")
     return 0
 
@@ -413,6 +477,31 @@ def register_digest_subparser(sub: argparse._SubParsersAction[Any]) -> None:
     )
     digest_parser.set_defaults(func=cmd_digest)
     d_sub = digest_parser.add_subparsers(dest="digest_command")
+
+    # run (end-to-end automated pipeline)
+    run_p = d_sub.add_parser("run", help="Execute complete automated weekly digest pipeline.")
+    run_p.add_argument("--role", choices=["learner", "tutor", "both"], default="both")
+    run_p.add_argument("--lang", choices=["en", "zh-CN", "vi"], default="zh-CN")
+    run_p.add_argument("--draft", action="store_true", help="Push drafts to Spark Desktop.")
+    run_p.add_argument("--push-crm", action="store_true", help="Push and sync with FluentCRM.")
+    run_p.add_argument("--site", default="xinchaovi.com", help="Target WordPress site.")
+    run_p.add_argument("--dry-run", action="store_true", help="Simulate run without writing files or remote APIs.")
+    run_p.add_argument("--to", help="Override recipient email.")
+    run_p.add_argument("--in-file", help="Path to input JSON scan file.")
+    run_p.add_argument("--out-dir", help="Directory to archive generated digests.")
+    run_p.add_argument("--json", action="store_true")
+    run_p.set_defaults(func=cmd_digest_run)
+
+    # cron (automated scheduler generator)
+    cron_p = d_sub.add_parser("cron", help="Generate crontab schedule entry for weekly automation.")
+    cron_p.add_argument("--role", choices=["learner", "tutor", "both"], default="both")
+    cron_p.add_argument("--lang", choices=["en", "zh-CN", "vi"], default="zh-CN")
+    cron_p.add_argument("--no-draft", dest="draft", action="store_false", help="Disable Spark draft dispatch.")
+    cron_p.add_argument("--no-crm", dest="push_crm", action="store_false", help="Disable FluentCRM sync.")
+    cron_p.add_argument("--schedule", default="0 9 * * 1", help="Cron schedule expression (default: Mon 9am).")
+    cron_p.add_argument("--python", help="Path to Python binary.")
+    cron_p.add_argument("--install", action="store_true", help="Print install instructions.")
+    cron_p.set_defaults(func=cmd_digest_cron)
 
     # scan
     scan_p = d_sub.add_parser("scan", help="Scan Preply emails from Spark or JSON cache.")

@@ -18,7 +18,10 @@ from pathlib import Path
 from preply_cli.email_system import (
     CadenceType,
     CRMPushResult,
+    DigestAutomationRunner,
     DigestConfig,
+    DigestResult,
+    DigestRunResult,
     EmailCategory,
     EmailDrafter,
     EmailRecord,
@@ -485,6 +488,132 @@ class TestAdversarialAndEdgeCases(unittest.TestCase):
         self.assertIn("暂无待上课时", html)
         self.assertIn("预约下一节课", html)
         self.assertIn("https://xinchaovi.com/student/", html)
+
+
+class TestDigestScheduler(unittest.TestCase):
+    """Test automated digest execution runner and cron generator."""
+
+    def test_generate_cron_entry_default(self):
+        cron_str = DigestAutomationRunner.generate_cron_entry()
+        self.assertTrue(cron_str.startswith("0 9 * * 1"))
+        self.assertIn("preply_cli digest run", cron_str)
+        self.assertIn("--role both", cron_str)
+        self.assertIn("--lang zh-CN", cron_str)
+        self.assertIn("--draft", cron_str)
+        self.assertIn("--push-crm", cron_str)
+        self.assertIn("digest_cron.log", cron_str)
+
+    def test_generate_cron_entry_custom(self):
+        cron_str = DigestAutomationRunner.generate_cron_entry(
+            role=UserRole.LEARNER,
+            language=Language.EN,
+            draft=False,
+            push_crm=False,
+            schedule_expression="30 8 * * 5",
+        )
+        self.assertTrue(cron_str.startswith("30 8 * * 5"))
+        self.assertIn("--role learner", cron_str)
+        self.assertIn("--lang en", cron_str)
+        self.assertNotIn("--draft", cron_str)
+        self.assertNotIn("--push-crm", cron_str)
+
+    def test_run_pipeline_dry_run_learner(self):
+        results = DigestAutomationRunner.run_pipeline(
+            role=UserRole.LEARNER,
+            language=Language.ZH,
+            dry_run=True,
+        )
+        self.assertEqual(len(results), 1)
+        res = results[0]
+        self.assertTrue(res.success)
+        self.assertEqual(res.role, UserRole.LEARNER)
+        self.assertEqual(res.language, Language.ZH)
+        self.assertTrue(len(res.subject) > 0)
+        self.assertTrue(res.subject.startswith("🌿") or res.subject.startswith("🎉"))
+        self.assertEqual(res.generated_html_path, "[dry-run]")
+        d = res.to_dict()
+        self.assertEqual(d["role"], "learner")
+        self.assertTrue(d["success"])
+
+    def test_run_pipeline_dry_run_both_roles(self):
+        results = DigestAutomationRunner.run_pipeline(
+            role=UserRole.BOTH,
+            language=Language.EN,
+            dry_run=True,
+        )
+        self.assertEqual(len(results), 2)
+        roles = [r.role for r in results]
+        self.assertIn(UserRole.LEARNER, roles)
+        self.assertIn(UserRole.TUTOR, roles)
+        self.assertTrue(all(r.success for r in results))
+
+
+class TestPeakMilestonesAndOutlookRendering(unittest.TestCase):
+    """Test extreme milestone tiers and cross-client Outlook / mobile markup."""
+
+    def test_peak_learner_milestone_copy(self):
+        # Test learner with 262 lessons (beyond standard 50-lesson tier)
+        metrics = LearnerMetrics(
+            total_completed_lessons=262,
+            total_hours=261.5,
+            current_cycle_granted=4,
+            current_cycle_consumed=4,
+            current_cycle_scheduled=0,
+            available_balance=0,
+            completion_rate_pct=100.0,
+            current_streak_weeks=12,
+            next_renewal_date="2026-09-15",
+            is_paused=False,
+            milestones=get_default_learner_milestones(),
+            next_milestone=None,
+            classes_needed_for_next=0,
+            upcoming_sessions=[],
+        )
+        copy_zh = PsychologicalCopywriter.craft_learner_copy(metrics, Language.ZH)
+        self.assertIn("殿堂级语言大家", copy_zh["spotlight_title"])
+        self.assertIn("顶 峰", copy_zh["spotlight_tag"])
+
+        copy_en = PsychologicalCopywriter.craft_learner_copy(metrics, Language.EN)
+        self.assertIn("Fluency Ambassador", copy_en["spotlight_title"])
+
+        copy_vi = PsychologicalCopywriter.craft_learner_copy(metrics, Language.VI)
+        self.assertIn("Đại Sứ Ngôn Ngữ", copy_vi["spotlight_title"])
+
+    def test_peak_tutor_milestone_copy(self):
+        # Test tutor with 330 lessons taught
+        metrics = TutorMetrics(
+            total_lessons_taught=330,
+            active_students_count=30,
+            student_names=["Alex", "Maria"],
+            booking_attempts_count=6,
+            payout_events_count=12,
+            current_streak_weeks=24,
+            milestones=get_default_tutor_milestones(),
+            next_milestone=None,
+            classes_needed_for_next=0,
+            upcoming_sessions=[],
+        )
+        copy_zh = PsychologicalCopywriter.craft_tutor_copy(metrics, Language.ZH)
+        self.assertIn("传奇领航导师", copy_zh["spotlight_title"])
+        self.assertIn("全球教学大使", copy_zh["spotlight_perk"])
+
+        copy_vi = PsychologicalCopywriter.craft_tutor_copy(metrics, Language.VI)
+        self.assertIn("Giảng viên Tinh hoa Toàn cầu", copy_vi["spotlight_title"])
+
+    def test_mso_and_responsive_markup_present(self):
+        metrics = SSOTCalculator.derive_learner_metrics([])
+        config = DigestConfig(language=Language.ZH)
+        _, html, _ = XinChaoViEmailRenderer.render_learner_email(metrics, config)
+
+        # MSO Outlook wrappers
+        self.assertIn("<!--[if (gte mso 9)|(IE)]>", html)
+        self.assertIn("<v:roundrect", html)
+        self.assertIn("<![endif]-->", html)
+
+        # Mobile and dark mode media queries
+        self.assertIn("@media only screen and (max-width: 620px)", html)
+        self.assertIn("@media (prefers-color-scheme: dark)", html)
+        self.assertIn(".gm-stat-num", html)
 
 
 if __name__ == "__main__":

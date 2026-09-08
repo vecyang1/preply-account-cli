@@ -2,12 +2,13 @@
 
 Direct parity with https://xinchaovi.com/student:
 - Brand colors: Terracotta (#E07A5F), Dark Slate (#1E293B), Sage (#81B29A), Amber (#F59E0B).
-- Dark gradient Hero Card with progress track and milestone beads.
-- 3-column stats grid for instant comprehension.
+- Dark gradient Hero Card with progress track and milestone beads (with solid fallback).
+- 3-column stats grid for instant comprehension (with mobile-responsive fluid scaling).
 - Next Milestone Spotlight card with perk unlock framing.
 - Upcoming sessions listing with topics and instructor attribution.
 - Psychological motivation spark card.
-- Email-safe inline CSS for flawless cross-client rendering (Gmail, Apple Mail, Outlook).
+- Bulletproof MSO conditionals and email-safe inline CSS for flawless cross-client rendering.
+- Dark mode compatibility for iOS Mail, Apple Mail, and modern clients.
 """
 
 from __future__ import annotations
@@ -33,6 +34,49 @@ class XinChaoViEmailRenderer:
     BRAND_WARNING = "#F59E0B"
 
     @classmethod
+    def _render_head_styles(cls) -> str:
+        """Return standardized email reset, responsiveness, and dark-mode styles."""
+        return """
+<style type="text/css">
+  /* Client resets */
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+  table { border-collapse: collapse !important; }
+  body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+
+  /* Mobile responsiveness */
+  @media only screen and (max-width: 620px) {
+    .gm-outer-wrap { padding: 12px 6px !important; }
+    .gm-container { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
+    .gm-header-pad { padding: 14px 16px !important; }
+    .gm-inner-pad { padding: 16px 14px !important; }
+    .gm-hero-pad { padding: 16px 14px !important; }
+    .gm-hero-number { font-size: 34px !important; }
+    .gm-stat-cell { padding: 8px 4px !important; }
+    .gm-stat-num { font-size: 18px !important; }
+    .gm-stat-lbl { font-size: 10px !important; }
+    .gm-stat-sub { font-size: 9px !important; }
+    .gm-btn-wrap { width: 100% !important; }
+    .gm-btn { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+    .gm-session-card td { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+    .gm-session-action { text-align: left !important; margin-top: 8px !important; width: 100% !important; }
+    .gm-session-action a { display: block !important; width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
+  }
+
+  /* Dark mode overrides */
+  @media (prefers-color-scheme: dark) {
+    body, .gm-body-bg { background-color: #0F172A !important; }
+    .gm-card-bg { background-color: #1E293B !important; border-color: #334155 !important; }
+    .gm-text-main { color: #F8FAFC !important; }
+    .gm-text-muted { color: #94A3B8 !important; }
+    .gm-sub-bg { background-color: #0F172A !important; border-color: #334155 !important; }
+    .gm-border-dark { border-color: #334155 !important; }
+  }
+</style>
+"""
+
+    @classmethod
     def render_learner_email(
         cls,
         metrics: LearnerMetrics,
@@ -54,7 +98,7 @@ class XinChaoViEmailRenderer:
                 border = "1px dashed rgba(255, 255, 255, 0.4)"
             beads_html += (
                 f'<td style="padding: 0 2px; width: {100 // total_beads}%;">'
-                f'<div style="height: 8px; border-radius: 4px; background: {bg}; border: {border};"></div>'
+                f'<div style="height: 8px; border-radius: 4px; background-color: {bg}; background: {bg}; border: {border};"></div>'
                 f'</td>'
             )
 
@@ -63,15 +107,15 @@ class XinChaoViEmailRenderer:
         if metrics.upcoming_sessions:
             for s in metrics.upcoming_sessions:
                 upcoming_items_html += f"""
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px; background: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_PRIMARY}; border-radius: 8px; padding: 12px 14px;">
+                <table width="100%" cellpadding="0" cellspacing="0" class="gm-session-card" style="margin-bottom: 10px; background-color: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_PRIMARY}; border-radius: 8px; padding: 12px 14px;">
                     <tr>
-                        <td>
+                        <td style="vertical-align: middle;">
                             <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">📅 {s.datetime_str}</div>
                             <div style="font-size: 12px; color: #475569; margin-bottom: 2px;"><strong>Instructor:</strong> {s.partner_name} · <strong>Subject:</strong> {s.subject_name}</div>
                             <div style="font-size: 12px; color: #64748B;">{s.topic}</div>
                         </td>
-                        <td align="right" valign="middle" style="width: 90px;">
-                            <a href="{s.meet_url or config.portal_url}" style="display: inline-block; background: #FFFFFF; border: 1px solid #CBD5E1; color: #1E293B; font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 6px; text-decoration: none;">Join / View →</a>
+                        <td align="right" valign="middle" class="gm-session-action" style="width: 105px; padding-left: 10px;">
+                            <a href="{s.meet_url or config.portal_url}" style="display: inline-block; background-color: #FFFFFF; border: 1px solid #CBD5E1; color: #1E293B; font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 6px; text-decoration: none; white-space: nowrap;">Join / View →</a>
                         </td>
                     </tr>
                 </table>
@@ -84,50 +128,73 @@ class XinChaoViEmailRenderer:
             else:
                 empty_msg = f"No sessions currently scheduled. You have {metrics.available_balance} lesson credit(s) ready to book!"
             upcoming_items_html = f"""
-            <div style="padding: 16px; text-align: center; background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; font-size: 12px; color: #64748B;">
+            <div style="padding: 18px; text-align: center; background-color: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; font-size: 13px; color: #64748B;">
                 {empty_msg}
             </div>
             """
 
         progress_width = min(100, max(5, int(round(metrics.completion_rate_pct))))
 
-        # HTML Email Payload
-        html = f"""<!DOCTYPE html>
-<html lang="en">
+        # HTML Email Payload with MSO & Bulletproof Email standards
+        html = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="x-apple-disable-message-reformatting" />
+<meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no" />
+<meta name="color-scheme" content="light dark" />
+<meta name="supported-color-schemes" content="light dark" />
 <title>{subject}</title>
+<!--[if mso]>
+<noscript>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+    </xml>
+</noscript>
+<![endif]-->
+{cls._render_head_styles()}
 </head>
-<body style="margin: 0; padding: 0; background-color: {cls.BRAND_LIGHT}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: {cls.BRAND_TEXT_MAIN};">
-<div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+<body class="gm-body-bg" style="margin: 0; padding: 0; background-color: {cls.BRAND_LIGHT}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: {cls.BRAND_TEXT_MAIN};">
+<div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
   {copy['preheader']}
 </div>
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color: {cls.BRAND_LIGHT}; padding: 24px 12px;">
+
+<!-- Outer Wrapper Table -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-outer-wrap" style="background-color: {cls.BRAND_LIGHT}; padding: 24px 12px;">
   <tr>
     <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 620px; background-color: {cls.BRAND_CARD_BG}; border-radius: 16px; overflow: hidden; border: 1px solid {cls.BRAND_BORDER}; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);">
+      <!--[if (gte mso 9)|(IE)]>
+      <table width="620" align="center" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+      <![endif]-->
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-container gm-card-bg" style="max-width: 620px; background-color: {cls.BRAND_CARD_BG}; border-radius: 16px; overflow: hidden; border: 1px solid {cls.BRAND_BORDER}; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);">
         
         <!-- Header Bar -->
         <tr>
-          <td style="padding: 18px 24px; border-bottom: 1px solid {cls.BRAND_BORDER}; background: #FFFFFF;">
-            <table width="100%" cellpadding="0" cellspacing="0">
+          <td class="gm-header-pad" style="padding: 18px 24px; border-bottom: 1px solid {cls.BRAND_BORDER}; background-color: #FFFFFF;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
-                  <table cellpadding="0" cellspacing="0">
+                <td style="vertical-align: middle;">
+                  <table cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <td style="width: 36px; height: 36px; border-radius: 10px; background: {cls.BRAND_PRIMARY}; color: #FFFFFF; font-weight: 800; text-align: center; font-size: 18px; vertical-align: middle;">
+                      <td style="width: 38px; height: 38px; border-radius: 10px; background-color: {cls.BRAND_PRIMARY}; color: #FFFFFF; font-weight: 800; text-align: center; font-size: 19px; vertical-align: middle;">
                         V
                       </td>
-                      <td style="padding-left: 10px;">
+                      <td style="padding-left: 12px; vertical-align: middle;">
                         <div style="font-size: 15px; font-weight: 800; color: {cls.BRAND_DARK}; letter-spacing: -0.2px;">XinChaoVi Learning Hub</div>
                         <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED};">Personalized Language Mastery</div>
                       </td>
                     </tr>
                   </table>
                 </td>
-                <td align="right">
-                  <span style="display: inline-block; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">
+                <td align="right" style="vertical-align: middle;">
+                  <span style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px;">
                     ● ACTIVE MOMENTUM
                   </span>
                 </td>
@@ -138,23 +205,23 @@ class XinChaoViEmailRenderer:
 
         <!-- Main Body Container -->
         <tr>
-          <td style="padding: 24px;">
+          <td class="gm-inner-pad" style="padding: 24px;">
             
-            <!-- Greeting -->
+            <!-- Greeting & Hero Headline -->
             <div style="font-size: 11px; font-weight: 800; color: {cls.BRAND_PRIMARY}; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">{copy['greeting']}</div>
-            <div style="font-size: 20px; font-weight: 800; color: {cls.BRAND_DARK}; letter-spacing: -0.3px; margin-bottom: 16px;">{copy['hero_headline']}</div>
+            <div style="font-size: 20px; font-weight: 800; color: {cls.BRAND_DARK}; letter-spacing: -0.3px; line-height: 1.35; margin-bottom: 16px;">{copy['hero_headline']}</div>
 
-            <!-- Hero Progress Card (Dark Gradient) -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: 14px; padding: 22px; color: #FFFFFF; margin-bottom: 16px;">
+            <!-- Hero Progress Card (Dark Gradient with Solid Fallback) -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-hero-pad" style="background-color: #1E293B; background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: 14px; padding: 22px; color: #FFFFFF; margin-bottom: 16px;">
               <tr>
                 <td>
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.6px;">
                         CURRENT CYCLE PROGRESS
                       </td>
                       <td align="right">
-                        <span style="background: rgba(224, 122, 95, 0.25); color: #FFAA8A; border: 1px solid rgba(224, 122, 95, 0.45); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px;">
+                        <span style="background-color: rgba(224, 122, 95, 0.25); color: #FFAA8A; border: 1px solid rgba(224, 122, 95, 0.45); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px;">
                           {metrics.completion_rate_pct}% COMPLETED
                         </span>
                       </td>
@@ -162,17 +229,17 @@ class XinChaoViEmailRenderer:
                   </table>
                   
                   <div style="margin: 12px 0 16px 0;">
-                    <span style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px; color: #FFFFFF;">{metrics.current_cycle_consumed}</span>
+                    <span class="gm-hero-number" style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px; color: #FFFFFF;">{metrics.current_cycle_consumed}</span>
                     <span style="font-size: 15px; color: #94A3B8; font-weight: 600;"> / {metrics.current_cycle_granted} Lessons Completed</span>
                   </div>
 
-                  <!-- Progress Bar -->
-                  <div style="height: 12px; background: rgba(255, 255, 255, 0.15); border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
-                    <div style="height: 100%; width: {progress_width}%; background: linear-gradient(90deg, #E07A5F 0%, #F59E0B 60%, #10B981 100%); border-radius: 6px;"></div>
+                  <!-- Progress Bar with Solid Fallback -->
+                  <div style="height: 12px; background-color: rgba(255, 255, 255, 0.15); border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
+                    <div style="height: 100%; width: {progress_width}%; background-color: {cls.BRAND_PRIMARY}; background: linear-gradient(90deg, #E07A5F 0%, #F59E0B 60%, #10B981 100%); border-radius: 6px;"></div>
                   </div>
 
                   <!-- Milestone Beads -->
-                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 6px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 6px;">
                     <tr>
                       {beads_html}
                     </tr>
@@ -185,38 +252,38 @@ class XinChaoViEmailRenderer:
               </tr>
             </table>
 
-            <!-- 3-Column Stats Grid -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px; padding: 12px 0;">
+            <!-- 3-Column Stats Grid (with mobile classes) -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-sub-bg" style="background-color: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px; padding: 12px 0;">
               <tr>
-                <td align="center" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
-                  <div style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{metrics.total_completed_lessons}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_completed_label']}</div>
-                  <div style="font-size: 10px; color: #94A3B8;">({metrics.total_hours:.1f} Total Hrs)</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{metrics.total_completed_lessons}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_completed_label']}</div>
+                  <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">({metrics.total_hours:.1f} Total Hrs)</div>
                 </td>
-                <td align="center" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
-                  <div style="font-size: 22px; font-weight: 800; color: {cls.BRAND_PRIMARY};">{metrics.available_balance}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_balance_label']}</div>
-                  <div style="font-size: 10px; color: #94A3B8;">(Ready to Book)</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_PRIMARY};">{metrics.available_balance}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_balance_label']}</div>
+                  <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">(Ready to Book)</div>
                 </td>
-                <td align="center" style="width: 33.3%;">
-                  <div style="font-size: 22px; font-weight: 800; color: #10B981;">{copy['stat_streak_val']}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_streak_label']}</div>
-                  <div style="font-size: 10px; color: #94A3B8;">(Steady Habit)</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%;">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: #10B981;">{copy['stat_streak_val']}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_streak_label']}</div>
+                  <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">(Steady Habit)</div>
                 </td>
               </tr>
             </table>
 
             <!-- Next Milestone Spotlight Card -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #FFF9F7; border: 1.5px solid #F1D4C8; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFF9F7; border: 1.5px solid #F1D4C8; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
               <tr>
                 <td>
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="font-size: 10px; font-weight: 800; color: {cls.BRAND_PRIMARY}; letter-spacing: 0.6px; text-transform: uppercase;">
                         {copy['spotlight_tag']}
                       </td>
                       <td align="right">
-                        <span style="background: #FDF2F0; border: 1px solid #F4A261; color: {cls.BRAND_PRIMARY}; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                        <span style="background-color: #FDF2F0; border: 1px solid #F4A261; color: {cls.BRAND_PRIMARY}; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
                           {copy['spotlight_needed']}
                         </span>
                       </td>
@@ -239,7 +306,7 @@ class XinChaoViEmailRenderer:
             {upcoming_items_html}
 
             <!-- Motivation Spark (Human / Psychological Note) -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F8FAF9; border-left: 4px solid {cls.BRAND_ACCENT}; border-radius: 12px; padding: 16px; margin: 18px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAF9; border-left: 4px solid {cls.BRAND_ACCENT}; border-radius: 12px; padding: 16px; margin: 18px 0;">
               <tr>
                 <td>
                   <div style="font-size: 13px; font-weight: 800; color: {cls.BRAND_DARK}; margin-bottom: 6px;">
@@ -252,13 +319,27 @@ class XinChaoViEmailRenderer:
               </tr>
             </table>
 
-            <!-- Action Button CTA -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+            <!-- Bulletproof Action Button CTA -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 22px;">
               <tr>
                 <td align="center">
-                  <a href="{config.booking_url}" style="display: block; width: 85%; max-width: 320px; background: {cls.BRAND_PRIMARY}; color: #FFFFFF; text-align: center; padding: 14px 20px; border-radius: 10px; font-size: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(224, 122, 95, 0.35);">
-                    {copy['cta_label']}
-                  </a>
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{config.booking_url}" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="18%" strokecolor="{cls.BRAND_PRIMARY}" fillcolor="{cls.BRAND_PRIMARY}">
+                    <w:anchorlock/>
+                    <center style="color:#ffffff;font-family:-apple-system,sans-serif;font-size:15px;font-weight:bold;">{copy['cta_label']}</center>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-->
+                  <table border="0" cellspacing="0" cellpadding="0" class="gm-btn-wrap" style="margin: 0 auto;">
+                    <tr>
+                      <td align="center" style="border-radius: 10px; background-color: {cls.BRAND_PRIMARY}; box-shadow: 0 4px 14px rgba(224, 122, 95, 0.35);">
+                        <a href="{config.booking_url}" target="_blank" class="gm-btn" style="font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #FFFFFF; text-decoration: none; border-radius: 10px; padding: 14px 28px; border: 1px solid {cls.BRAND_PRIMARY}; display: inline-block; font-weight: 800; letter-spacing: 0.2px;">
+                          {copy['cta_label']}
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                  <!--<![endif]-->
                 </td>
               </tr>
             </table>
@@ -268,7 +349,7 @@ class XinChaoViEmailRenderer:
 
         <!-- Footer -->
         <tr>
-          <td style="padding: 20px 24px; background: #F8FAFC; border-top: 1px solid {cls.BRAND_BORDER}; text-align: center; font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; line-height: 1.6;">
+          <td class="gm-footer" style="padding: 20px 24px; background-color: #F8FAFC; border-top: 1px solid {cls.BRAND_BORDER}; text-align: center; font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; line-height: 1.6;">
             <div>XinChaoVi Student Transparency Portal · Real-time Single Source of Truth</div>
             <div style="margin-top: 4px;">{copy['footer_help']}</div>
             <div style="margin-top: 10px; color: #94A3B8;">
@@ -280,6 +361,12 @@ class XinChaoViEmailRenderer:
         </tr>
 
       </table>
+
+      <!--[if (gte mso 9)|(IE)]>
+          </td>
+        </tr>
+      </table>
+      <![endif]-->
     </td>
   </tr>
 </table>
@@ -334,55 +421,114 @@ XinChaoVi Learning Hub · support@xinchaovi.com
         copy = PsychologicalCopywriter.craft_tutor_copy(metrics, config.language)
         subject = copy["subject"]
 
+        # Tutor honor beads
+        beads_html = ""
+        tutor_milestones = metrics.milestones or []
+        total_beads = len(tutor_milestones) or 5
+        for m in tutor_milestones:
+            if m.unlocked:
+                bg = cls.BRAND_ACCENT
+                border = "none"
+            else:
+                bg = "rgba(255, 255, 255, 0.2)"
+                border = "1px dashed rgba(255, 255, 255, 0.4)"
+            beads_html += (
+                f'<td style="padding: 0 2px; width: {100 // total_beads}%;">'
+                f'<div style="height: 8px; border-radius: 4px; background-color: {bg}; background: {bg}; border: {border};"></div>'
+                f'</td>'
+            )
+
         # Upcoming sessions
         upcoming_items_html = ""
         if metrics.upcoming_sessions:
             for s in metrics.upcoming_sessions:
                 upcoming_items_html += f"""
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px; background: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_ACCENT}; border-radius: 8px; padding: 12px 14px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-session-card" style="margin-bottom: 10px; background-color: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_ACCENT}; border-radius: 8px; padding: 12px 14px;">
                     <tr>
-                        <td>
+                        <td style="vertical-align: middle;">
                             <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">📅 {s.datetime_str}</div>
                             <div style="font-size: 12px; color: #475569;"><strong>Student:</strong> {s.partner_name} · 1-on-1 Class</div>
                         </td>
-                        <td align="right">
-                            <a href="{config.portal_url}" style="display: inline-block; background: #FFFFFF; border: 1px solid #CBD5E1; color: #1E293B; font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 6px; text-decoration: none;">View Classroom →</a>
+                        <td align="right" valign="middle" class="gm-session-action" style="width: 125px; padding-left: 10px;">
+                            <a href="{config.portal_url}" style="display: inline-block; background-color: #FFFFFF; border: 1px solid #CBD5E1; color: #1E293B; font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 6px; text-decoration: none; white-space: nowrap;">View Classroom →</a>
                         </td>
                     </tr>
                 </table>
                 """
         else:
+            if config.language == Language.ZH:
+                empty_tutor_msg = "暂无待上课时。建议在导师工作台开放更多空闲时间段，让学员随时预约！"
+            elif config.language == Language.VI:
+                empty_tutor_msg = "Hôm nay chưa có lịch dạy. Thầy/Cô hãy mở thêm khung giờ trống để học viên đặt lịch nhé!"
+            else:
+                empty_tutor_msg = "No teaching sessions scheduled today. Open open time slots to let students book!"
             upcoming_items_html = f"""
-            <div style="padding: 16px; text-align: center; background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; font-size: 12px; color: #64748B;">
-                No teaching sessions scheduled today. Open open time slots to let students book!
+            <div style="padding: 18px; text-align: center; background-color: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; font-size: 13px; color: #64748B;">
+                {empty_tutor_msg}
             </div>
             """
 
         revenue_display = f"${metrics.total_revenue_usd:,.2f}" if metrics.total_revenue_usd else "Active"
 
-        html = f"""<!DOCTYPE html>
-<html lang="en">
+        html = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="x-apple-disable-message-reformatting" />
+<meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no" />
+<meta name="color-scheme" content="light dark" />
+<meta name="supported-color-schemes" content="light dark" />
 <title>{subject}</title>
+<!--[if mso]>
+<noscript>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+    </xml>
+</noscript>
+<![endif]-->
+{cls._render_head_styles()}
 </head>
-<body style="margin: 0; padding: 0; background-color: {cls.BRAND_LIGHT}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: {cls.BRAND_TEXT_MAIN};">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color: {cls.BRAND_LIGHT}; padding: 24px 12px;">
+<body class="gm-body-bg" style="margin: 0; padding: 0; background-color: {cls.BRAND_LIGHT}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: {cls.BRAND_TEXT_MAIN};">
+<div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
+  {copy['preheader']}
+</div>
+
+<!-- Outer Wrapper Table -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-outer-wrap" style="background-color: {cls.BRAND_LIGHT}; padding: 24px 12px;">
   <tr>
     <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 620px; background-color: {cls.BRAND_CARD_BG}; border-radius: 16px; overflow: hidden; border: 1px solid {cls.BRAND_BORDER}; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);">
+      <!--[if (gte mso 9)|(IE)]>
+      <table width="620" align="center" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+      <![endif]-->
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-container gm-card-bg" style="max-width: 620px; background-color: {cls.BRAND_CARD_BG}; border-radius: 16px; overflow: hidden; border: 1px solid {cls.BRAND_BORDER}; box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);">
         
         <!-- Header -->
         <tr>
-          <td style="padding: 18px 24px; border-bottom: 1px solid {cls.BRAND_BORDER}; background: #FFFFFF;">
-            <table width="100%" cellpadding="0" cellspacing="0">
+          <td class="gm-header-pad" style="padding: 18px 24px; border-bottom: 1px solid {cls.BRAND_BORDER}; background-color: #FFFFFF;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
-                  <span style="font-size: 16px; font-weight: 800; color: {cls.BRAND_DARK};">XinChaoVi Educator Hub</span>
+                <td style="vertical-align: middle;">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="width: 38px; height: 38px; border-radius: 10px; background-color: {cls.BRAND_ACCENT}; color: #FFFFFF; font-weight: 800; text-align: center; font-size: 19px; vertical-align: middle;">
+                        V
+                      </td>
+                      <td style="padding-left: 12px; vertical-align: middle;">
+                        <div style="font-size: 15px; font-weight: 800; color: {cls.BRAND_DARK}; letter-spacing: -0.2px;">XinChaoVi Educator Hub</div>
+                        <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED};">Personalized Mentorship Network</div>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
-                <td align="right">
-                  <span style="background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">
+                <td align="right" style="vertical-align: middle;">
+                  <span style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px;">
                     ● CERTIFIED MENTOR
                   </span>
                 </td>
@@ -393,51 +539,59 @@ XinChaoVi Learning Hub · support@xinchaovi.com
 
         <!-- Main Body -->
         <tr>
-          <td style="padding: 24px;">
+          <td class="gm-inner-pad" style="padding: 24px;">
             <div style="font-size: 11px; font-weight: 800; color: {cls.BRAND_ACCENT}; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">{copy['greeting']}</div>
-            <div style="font-size: 20px; font-weight: 800; color: {cls.BRAND_DARK}; margin-bottom: 16px;">{copy['hero_headline']}</div>
+            <div style="font-size: 20px; font-weight: 800; color: {cls.BRAND_DARK}; line-height: 1.35; margin-bottom: 16px;">{copy['hero_headline']}</div>
 
-            <!-- Hero Teaching Card -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: 14px; padding: 22px; color: #FFFFFF; margin-bottom: 16px;">
+            <!-- Hero Teaching Card (Dark Gradient with Solid Fallback) -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-hero-pad" style="background-color: #1E293B; background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: 14px; padding: 22px; color: #FFFFFF; margin-bottom: 16px;">
               <tr>
                 <td>
-                  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94A3B8;">LIFETIME MENTORSHIP IMPACT</div>
+                  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.6px;">LIFETIME MENTORSHIP IMPACT</div>
                   <div style="margin: 10px 0;">
-                    <span style="font-size: 44px; font-weight: 800; color: #FFFFFF;">{metrics.total_lessons_taught}</span>
+                    <span class="gm-hero-number" style="font-size: 44px; font-weight: 800; color: #FFFFFF; line-height: 1;">{metrics.total_lessons_taught}</span>
                     <span style="font-size: 16px; color: #CBD5E1; font-weight: 600;"> Confirmed Lessons Taught</span>
                   </div>
-                  <div style="font-size: 12px; color: #94A3B8;">
-                    Lifetime Mentorship Earnings: <strong style="color: #10B981;">{revenue_display}</strong> · Active Students: <strong>{metrics.active_students_count}</strong>
+
+                  <!-- Honor Beads -->
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 10px 0;">
+                    <tr>
+                      {beads_html}
+                    </tr>
+                  </table>
+
+                  <div style="font-size: 12px; color: #94A3B8; margin-top: 6px;">
+                    Lifetime Mentorship Impact: <strong style="color: #10B981;">{revenue_display}</strong> · Active Students: <strong>{metrics.active_students_count}</strong>
                   </div>
                 </td>
               </tr>
             </table>
 
             <!-- 3-Column Stats Grid -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px; padding: 12px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-sub-bg" style="background-color: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px; padding: 12px 0;">
               <tr>
-                <td align="center" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
-                  <div style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{metrics.total_lessons_taught}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600;">{copy['stat_completed_label']}</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{metrics.total_lessons_taught}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_completed_label']}</div>
                 </td>
-                <td align="center" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
-                  <div style="font-size: 22px; font-weight: 800; color: {cls.BRAND_PRIMARY};">{metrics.active_students_count}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600;">{copy['stat_balance_label']}</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_PRIMARY};">{metrics.active_students_count}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_balance_label']}</div>
                 </td>
-                <td align="center" style="width: 33.3%;">
-                  <div style="font-size: 22px; font-weight: 800; color: #10B981;">{copy['stat_streak_val']}</div>
-                  <div style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600;">{copy['stat_streak_label']}</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%;">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: #10B981;">{copy['stat_streak_val']}</div>
+                  <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_streak_label']}</div>
                 </td>
               </tr>
             </table>
 
             <!-- Next Honor Badge -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
               <tr>
                 <td>
                   <div style="font-size: 10px; font-weight: 800; color: #166534; text-transform: uppercase;">{copy['spotlight_tag']}</div>
                   <div style="font-size: 16px; font-weight: 800; color: {cls.BRAND_DARK}; margin: 6px 0;">🏆 {copy['spotlight_title']}</div>
-                  <div style="font-size: 12px; color: #374151;">{copy['spotlight_perk']} ({copy['spotlight_needed']})</div>
+                  <div style="font-size: 12px; color: #374151; line-height: 1.5;"><strong style="color: #166534;">{copy['spotlight_perk_label']}</strong> {copy['spotlight_perk']} ({copy['spotlight_needed']})</div>
                 </td>
               </tr>
             </table>
@@ -447,7 +601,7 @@ XinChaoVi Learning Hub · support@xinchaovi.com
             {upcoming_items_html}
 
             <!-- Educator Note -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F8FAFC; border-radius: 12px; padding: 16px; margin: 18px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAF9; border-left: 4px solid {cls.BRAND_ACCENT}; border-radius: 12px; padding: 16px; margin: 18px 0;">
               <tr>
                 <td>
                   <div style="font-size: 13px; font-weight: 800; color: {cls.BRAND_DARK}; margin-bottom: 6px;">{copy['motivation_title']}</div>
@@ -456,13 +610,27 @@ XinChaoVi Learning Hub · support@xinchaovi.com
               </tr>
             </table>
 
-            <!-- CTA -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 18px;">
+            <!-- Bulletproof CTA -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 20px;">
               <tr>
                 <td align="center">
-                  <a href="{config.portal_url}" style="display: block; width: 85%; max-width: 320px; background: {cls.BRAND_SECONDARY}; color: #FFFFFF; text-align: center; padding: 14px 20px; border-radius: 10px; font-size: 15px; font-weight: 800; text-decoration: none;">
-                    {copy['cta_label']}
-                  </a>
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{config.portal_url}" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="18%" strokecolor="{cls.BRAND_SECONDARY}" fillcolor="{cls.BRAND_SECONDARY}">
+                    <w:anchorlock/>
+                    <center style="color:#ffffff;font-family:-apple-system,sans-serif;font-size:15px;font-weight:bold;">{copy['cta_label']}</center>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-->
+                  <table border="0" cellspacing="0" cellpadding="0" class="gm-btn-wrap" style="margin: 0 auto;">
+                    <tr>
+                      <td align="center" style="border-radius: 10px; background-color: {cls.BRAND_SECONDARY}; box-shadow: 0 4px 14px rgba(61, 64, 91, 0.35);">
+                        <a href="{config.portal_url}" target="_blank" class="gm-btn" style="font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #FFFFFF; text-decoration: none; border-radius: 10px; padding: 14px 28px; border: 1px solid {cls.BRAND_SECONDARY}; display: inline-block; font-weight: 800; letter-spacing: 0.2px;">
+                          {copy['cta_label']}
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                  <!--<![endif]-->
                 </td>
               </tr>
             </table>
@@ -471,12 +639,23 @@ XinChaoVi Learning Hub · support@xinchaovi.com
 
         <!-- Footer -->
         <tr>
-          <td style="padding: 18px 24px; background: #F8FAFC; border-top: 1px solid {cls.BRAND_BORDER}; text-align: center; font-size: 11px; color: {cls.BRAND_TEXT_MUTED};">
+          <td class="gm-footer" style="padding: 18px 24px; background-color: #F8FAFC; border-top: 1px solid {cls.BRAND_BORDER}; text-align: center; font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; line-height: 1.6;">
             <div>XinChaoVi Educator Network · Preply Verified Partner</div>
             <div style="margin-top: 4px;">{copy['footer_help']}</div>
+            <div style="margin-top: 10px; color: #94A3B8;">
+              <a href="{config.portal_url}" style="color: {cls.BRAND_PRIMARY}; text-decoration: none; font-weight: 600;">Educator Hub</a> · 
+              <a href="{config.portal_url}#schedule" style="color: {cls.BRAND_PRIMARY}; text-decoration: none; font-weight: 600;">Classroom Calendar</a> · 
+              <a href="{config.portal_url}#resources" style="color: {cls.BRAND_PRIMARY}; text-decoration: none; font-weight: 600;">Teaching Materials</a>
+            </div>
           </td>
         </tr>
       </table>
+
+      <!--[if (gte mso 9)|(IE)]>
+          </td>
+        </tr>
+      </table>
+      <![endif]-->
     </td>
   </tr>
 </table>

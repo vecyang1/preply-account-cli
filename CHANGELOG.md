@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.13.0 - 2026-09-08
+
+### Production Hardening: Cross-Client Email Compatibility, Peak Milestones & Automation Runner
+
+- **Automated Execution Runner & Scheduler (`DigestAutomationRunner`)**:
+  - Added end-to-end pipeline runner orchestrating email extraction, SSOT calculation, HTML/plaintext compilation, optional Spark Desktop drafting, and FluentCRM remote synchronization.
+  - Implemented `preply digest run`: one-command weekly execution for learners, tutors, or both.
+  - Implemented `preply digest cron`: automated generation of system crontab entries with execution logging in `data/digest_run_log.json`.
+- **Bulletproof Email Client Compatibility (`XinChaoViEmailRenderer`)**:
+  - Outlook / Windows Desktop support: wrapped main containers and tables in MSO conditionals (`<!--[if (gte mso 9)|(IE)]>`).
+  - Bulletproof VML CTA buttons (`<v:roundrect>`) for consistent button rendering across legacy Outlook and Word engines.
+  - Added solid background-color fallbacks for all CSS gradients.
+  - Mobile responsive optimization with `@media only screen and (max-width: 620px)` and dark mode detection (`@media (prefers-color-scheme: dark)`).
+- **Peak Lifetime Milestone Handling & Trilingual Polish (`PsychologicalCopywriter`)**:
+  - Added dedicated milestone rewards and congratulatory banners for veteran learners (>= 50, 100, 262 lessons) and master tutors (>= 150, 330 lessons).
+  - Completed Vietnamese tutor copywriting matrix across all milestone and motivation stages.
+- **FluentCRM Remote Updates**:
+  - Synchronized and verified all 6 remote templates (IDs 2733 to 2738) on `xinchaovi.com` with remote readback verification.
+- **Test Suite Expansion**:
+  - 267/267 unit and regression tests passing in `tests/test_email_system.py` and `tests/test_module_wiring.py`.
+
 ## 0.12.0 - 2026-09-08
 
 ### New: Periodic Encouragement Email & Motivation System (`preply digest`)

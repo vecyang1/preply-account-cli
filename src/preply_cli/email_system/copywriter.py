@@ -27,6 +27,7 @@ class PsychologicalCopywriter:
         granted = metrics.current_cycle_granted
         pct = metrics.completion_rate_pct
         needed = metrics.classes_needed_for_next
+        is_peak = (needed == 0 and completed >= 50)
         next_m_title = metrics.next_milestone.title if metrics.next_milestone else "Fluency Ambassador"
         next_m_perk = metrics.next_milestone.perk if metrics.next_milestone else "Advanced Mastery"
 
@@ -72,11 +73,11 @@ class PsychologicalCopywriter:
                 "stat_balance_label": "待预约余额",
                 "stat_streak_label": "连续学习周数",
                 "stat_streak_val": f"{metrics.current_streak_weeks} 周",
-                "spotlight_tag": "即 将 解 锁 的 下 一 里 程 碑",
-                "spotlight_title": next_m_title,
-                "spotlight_needed": f"还需 {needed} 节课解锁" if needed > 0 else "里程碑已全部达成！",
-                "spotlight_perk_label": "🎁 解锁成长权益：",
-                "spotlight_perk": next_m_perk,
+                "spotlight_tag": "🌟 荣 誉 里 程 碑 顶 峰 成 就" if is_peak else "即 将 解 锁 的 下 一 里 程 碑",
+                "spotlight_title": "殿堂级语言大家 (Fluency Ambassador)" if is_peak else next_m_title,
+                "spotlight_needed": "✨ 终身荣誉已解锁" if is_peak else (f"还需 {needed} 节课解锁" if needed > 0 else "里程碑已全部达成！"),
+                "spotlight_perk_label": "🎁 专属成长特权：" if is_peak else "🎁 解锁成长权益：",
+                "spotlight_perk": "高阶跨文化自由对话与双语思维构建，定制专属个性化复习语料库" if is_peak else next_m_perk,
                 "upcoming_title": "近期课程安排",
                 "motivation_title": "写在今天的小鼓励 ✨",
                 "motivation_body": spark_body,
@@ -112,11 +113,11 @@ class PsychologicalCopywriter:
                 "stat_balance_label": "Số dư còn lại",
                 "stat_streak_label": "Tuần liên tục",
                 "stat_streak_val": f"{metrics.current_streak_weeks} tuần",
-                "spotlight_tag": "CỘT MỐC TIẾP THEO",
-                "spotlight_title": next_m_title,
-                "spotlight_needed": f"Cần thêm {needed} buổi để mở khóa" if needed > 0 else "Đã đạt cấp độ cao nhất!",
-                "spotlight_perk_label": "🎁 QUYỀN LỢI:",
-                "spotlight_perk": next_m_perk,
+                "spotlight_tag": "🌟 CỘT MỐC ĐỈNH CAO ĐÃ MỞ KHÓA" if is_peak else "CỘT MỐC TIẾP THEO",
+                "spotlight_title": "Đại Sứ Ngôn Ngữ Tinh Hoa (Fluency Ambassador)" if is_peak else next_m_title,
+                "spotlight_needed": "✨ Đã đạt danh hiệu cao nhất!" if is_peak else (f"Cần thêm {needed} buổi để mở khóa" if needed > 0 else "Đã đạt cấp độ cao nhất!"),
+                "spotlight_perk_label": "🎁 ĐẶC QUYỀN TRỌN ĐỜI:" if is_peak else "🎁 QUYỀN LỢI:",
+                "spotlight_perk": "Giao tiếp chuyên sâu đa văn hóa & Quyền ưu tiên xếp lịch VIP" if is_peak else next_m_perk,
                 "upcoming_title": "Lịch học sắp tới",
                 "motivation_title": "Động lực hôm nay ✨",
                 "motivation_body": spark_body,
@@ -168,11 +169,11 @@ class PsychologicalCopywriter:
             "stat_balance_label": "Ready to Book",
             "stat_streak_label": "Weekly Streak",
             "stat_streak_val": f"{metrics.current_streak_weeks} wks",
-            "spotlight_tag": "NEXT MILESTONE UNLOCK",
-            "spotlight_title": next_m_title,
-            "spotlight_needed": f"{needed} class{'es' if needed > 1 else ''} to unlock" if needed > 0 else "All core milestones unlocked!",
-            "spotlight_perk_label": "🎁 UNLOCKS:",
-            "spotlight_perk": next_m_perk,
+            "spotlight_tag": "🌟 PEAK LIFETIME HONOR UNLOCKED" if is_peak else "NEXT MILESTONE UNLOCK",
+            "spotlight_title": "Fluency Ambassador & Master Scholar" if is_peak else next_m_title,
+            "spotlight_needed": "✨ Lifetime Honor Achieved!" if is_peak else (f"{needed} class{'es' if needed > 1 else ''} to unlock" if needed > 0 else "All core milestones unlocked!"),
+            "spotlight_perk_label": "🎁 LIFETIME PRIVILEGE:" if is_peak else "🎁 UNLOCKS:",
+            "spotlight_perk": "Advanced cross-cultural fluency mastery & custom high-tier conversation topics" if is_peak else next_m_perk,
             "upcoming_title": "Upcoming Sessions",
             "motivation_title": "The Motivation Spark ✨",
             "motivation_body": spark_body,
@@ -186,9 +187,10 @@ class PsychologicalCopywriter:
         taught = metrics.total_lessons_taught
         students = metrics.active_students_count
         attempts = metrics.booking_attempts_count
-        next_m_title = metrics.next_milestone.title if metrics.next_milestone else "Global Ambassador"
-        next_m_perk = metrics.next_milestone.perk if metrics.next_milestone else "Master Mentor Honor"
         needed = metrics.classes_needed_for_next
+        is_peak = (needed == 0 and taught >= 300)
+        next_m_title = metrics.next_milestone.title if metrics.next_milestone else "Global Luminary"
+        next_m_perk = metrics.next_milestone.perk if metrics.next_milestone else "Master Mentor Honor"
 
         if lang == Language.ZH:
             attempt_text = (
@@ -211,16 +213,49 @@ class PsychologicalCopywriter:
                 "stat_balance_label": "指导学员数",
                 "stat_streak_label": "持续带教周数",
                 "stat_streak_val": f"{metrics.current_streak_weeks} 周",
-                "spotlight_tag": "导 师 荣 誉 里 程 碑",
-                "spotlight_title": next_m_title,
-                "spotlight_needed": f"还需带教 {needed} 节课达成" if needed > 0 else "已登顶顶级荣誉殿堂！",
-                "spotlight_perk_label": "🎁 导师荣誉成就：",
-                "spotlight_perk": next_m_perk,
+                "spotlight_tag": "🌟 导 师 顶 峰 荣 誉 殿 堂" if is_peak else "导 师 荣 誉 里 程 碑",
+                "spotlight_title": "传奇领航导师 (Global Luminary)" if is_peak else next_m_title,
+                "spotlight_needed": "✨ 已登顶顶级荣誉殿堂！" if is_peak else (f"还需带教 {needed} 节课达成" if needed > 0 else "已登顶顶级荣誉殿堂！"),
+                "spotlight_perk_label": "🎁 终身荣誉特权：" if is_peak else "🎁 导师荣誉成就：",
+                "spotlight_perk": "全球教学大使终身荣誉与平台超级导师顶格推介" if is_peak else next_m_perk,
                 "upcoming_title": "近期排课课历",
                 "motivation_title": "导师初心与寄语 🌿",
                 "motivation_body": spark_body,
                 "cta_label": "打开导师工作台与课表 ↗",
                 "footer_help": "如需开辟新的专属课时或调整学员订阅策略，请前往导师后台统一操作。",
+            }
+
+        elif lang == Language.VI:
+            attempt_text = (
+                f"Gần đây có {attempts} học viên tiềm năng quan tâm và muốn đặt lịch học. Một tin nhắn chào đón ấm áp sẽ mở ra cơ hội đồng hành lâu dài."
+                if attempts > 0 else
+                "Sự kiên nhẫn sư phạm và nhịp dạy đều đặn của Thầy/Cô là nền tảng vững chắc cho sự tiến bộ của học viên."
+            )
+            spark_body = (
+                f"Với vai trò giảng viên, Thầy/Cô đã hoàn thành {taught} buổi học 1-kèm-1, đồng hành cùng hơn {students} học viên tâm huyết. "
+                "Dạy một ngôn ngữ không chỉ là truyền đạt từ vựng hay ngữ pháp, mà là trao chiếc chìa khóa giúp học viên kết nối tự tin với thế giới. "
+                f"{attempt_text}"
+            )
+            return {
+                "subject": f"🏆 Báo cáo vinh danh giảng viên: Đã hoàn thành {taught} buổi dạy chất lượng cao!",
+                "preheader": f"Tổng cộng {taught} buổi dạy · Đồng hành cùng {students} học viên tiến bộ.",
+                "greeting": "Kính gửi Quý Giảng viên,",
+                "hero_headline": "Mỗi giờ giảng dạy tận tâm đều mở ra chân trời mới cho học viên",
+                "hero_subheadline": f"Đã hoàn thành xuất sắc {taught} buổi dạy 1-kèm-1, hướng dẫn {students} học viên tích cực.",
+                "stat_completed_label": "Buổi đã dạy",
+                "stat_balance_label": "Học viên đồng hành",
+                "stat_streak_label": "Tuần liên tục",
+                "stat_streak_val": f"{metrics.current_streak_weeks} tuần",
+                "spotlight_tag": "🌟 VINH DANH GIẢNG VIÊN ĐỈNH CAO" if is_peak else "CỘT MỐC VINH DANH GIẢNG VIÊN",
+                "spotlight_title": "Giảng viên Tinh hoa Toàn cầu (Global Luminary)" if is_peak else next_m_title,
+                "spotlight_needed": "✨ Đã đạt đỉnh cao danh dự!" if is_peak else (f"Cần thêm {needed} buổi để đạt mốc" if needed > 0 else "Đã đạt cấp bậc vinh danh cao nhất!"),
+                "spotlight_perk_label": "🎁 ĐẶC QUYỀN TRỌN ĐỜI:" if is_peak else "🎁 ĐẶC QUYỀN VINH DANH:",
+                "spotlight_perk": "Đại sứ giảng dạy toàn cầu & Vinh danh xuất sắc trọn đời" if is_peak else next_m_perk,
+                "upcoming_title": "Lịch dạy sắp tới",
+                "motivation_title": "Góc suy ngẫm của Giảng viên 🌿",
+                "motivation_body": spark_body,
+                "cta_label": "Mở Bảng Điều Khiển Giảng Dạy ↗",
+                "footer_help": "Cần mở thêm lịch dạy hoặc điều chỉnh chương trình? Hãy truy cập trung tâm giảng viên.",
             }
 
         # Default English
@@ -244,11 +279,11 @@ class PsychologicalCopywriter:
             "stat_balance_label": "Active Learners",
             "stat_streak_label": "Teaching Streak",
             "stat_streak_val": f"{metrics.current_streak_weeks} wks",
-            "spotlight_tag": "EDUCATOR MILESTONE HONORS",
-            "spotlight_title": next_m_title,
-            "spotlight_needed": f"{needed} sessions to unlock" if needed > 0 else "Highest Honor Achieved!",
-            "spotlight_perk_label": "🎁 HONOR PRIVILEGE:",
-            "spotlight_perk": next_m_perk,
+            "spotlight_tag": "🌟 LIFETIME EDUCATOR PEAK HONOR" if is_peak else "EDUCATOR MILESTONE HONORS",
+            "spotlight_title": "Global Luminary & Master Educator" if is_peak else next_m_title,
+            "spotlight_needed": "✨ Highest Honor Achieved!" if is_peak else (f"{needed} sessions to unlock" if needed > 0 else "Highest Honor Achieved!"),
+            "spotlight_perk_label": "🎁 LIFETIME HONOR:" if is_peak else "🎁 HONOR PRIVILEGE:",
+            "spotlight_perk": "Global Teaching Ambassador & Lifetime Excellence Honor" if is_peak else next_m_perk,
             "upcoming_title": "Upcoming Mentorship Sessions",
             "motivation_title": "Educator's Reflection 🌿",
             "motivation_body": spark_body,

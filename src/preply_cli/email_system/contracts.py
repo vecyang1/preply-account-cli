@@ -204,3 +204,26 @@ class DigestResult:
     preview_file_path: Optional[str] = None
     spark_draft_id: Optional[str] = None
     spark_deep_link: Optional[str] = None
+
+
+@dataclass
+class DigestRunResult:
+    """Outcome of an automated periodic digest execution."""
+    timestamp: str
+    role: UserRole
+    language: Language
+    subject: str
+    recipient: str
+    generated_html_path: Optional[str] = None
+    generated_text_path: Optional[str] = None
+    spark_draft_id: Optional[str] = None
+    crm_template_id: Optional[int] = None
+    success: bool = True
+    error: Optional[str] = None
+
+    def to_dict(self) -> dict[str, Any]:
+        d = asdict(self)
+        d["role"] = self.role.value
+        d["language"] = self.language.value
+        return d
+
