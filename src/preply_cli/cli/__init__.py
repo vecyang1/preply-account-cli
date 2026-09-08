@@ -56,6 +56,7 @@ from .tutor_cmds import (
     cmd_students,
     cmd_wallet,
 )
+from .digest_cmds import register_digest_subparser
 
 __all__ = ["build_parser", "main", "SnapshotError", "SNAPSHOT_MARKERS"]
 
@@ -470,6 +471,8 @@ def build_parser() -> argparse.ArgumentParser:
     session.add_argument("--json", action="store_true")
     session.add_argument("--csv", action="store_true", help="Format output as CSV.")
     session.set_defaults(func=cmd_session)
+
+    register_digest_subparser(sub)
     return parser
 
 

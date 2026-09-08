@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.12.0 - 2026-09-08
+
+### New: Periodic Encouragement Email & Motivation System (`preply digest`)
+
+- **Scanner & Categorizer (`PreplyEmailScanner`)**:
+  - Live query via `spark search --filter "from:preply.com"` across mailboxes (`vecs@foxmail.com` and `yanghxmail@gmail.com`) or file caches (`data/preply_scanned_emails.json`).
+  - Classifies 10+ Preply lifecycle email categories (completed lessons, upcoming bookings, subscription renewals, pauses, streaks, payouts).
+- **Single Source of Truth Metrics (`SSOTCalculator`)**:
+  - Computes non-negative available balances, clamped completion rates, streaks, and milestone progression.
+  - Multi-tier milestone ladders for both learners (6 levels) and tutors (5 levels).
+- **Psychological Copywriting Engine (`PsychologicalCopywriter`)**:
+  - Multilingual support for Simplified Chinese (`zh-CN`), English (`en`), and Vietnamese (`vi`).
+  - Adheres to "说人话，不要说实话": reframes paused subscriptions into natural knowledge digestion; celebrates 100% hour depletion as victory; eliminates bureaucratic/harsh administrative vocabulary.
+- **Design System Parity Email Renderer (`XinChaoViEmailRenderer`)**:
+  - Direct token parity with `https://xinchaovi.com/student`: Terracotta (`#E07A5F`), Dark Slate (`#1E293B`), Sage (`#81B29A`), Amber (`#F59E0B`).
+  - Responsive layout: dark gradient hero progress track, milestone beads, 3-column stats grid, upcoming class cards, and localized CTAs.
+- **Spark Drafter & Browser Preview (`EmailDrafter`)**:
+  - Auto-drafting via Spark Desktop IPC with graceful HTML preview fallback (`data/preview_digest.html`).
+- **FluentCRM Synchronization (`FluentCRMSync`)**:
+  - Seeds and synchronizes templates directly into WordPress `fc_template` on `xinchaovi.com` with remote readback verification.
+  - Deployed template IDs: `2733` (Learner ZH), `2734` (Tutor ZH), `2735` (Learner EN), `2736` (Tutor EN), `2737` (Learner VI), `2738` (Tutor VI).
+- **Full Test Suite & Invariant Verification**:
+  - Comprehensive unit and adversarial test suite in `tests/test_email_system.py` (260/260 tests passing in 0.44s).
+  - CLI invariant checker: `preply digest verify`.
+
 ## 0.11.0 - 2026-09-06
 
 ### New: Tutor Acceptance Status, Overbooked Detection & Pricing Normalization

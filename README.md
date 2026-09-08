@@ -151,6 +151,14 @@ preply compare data/learner.json data/tutor.json
 - `analyze`: summary plus timeline. Add `--deep` for per-student past lesson fetching.
 - `snapshot`: local JSON snapshot for later comparison.
 - `compare`: compare saved snapshots from different accounts.
+- `digest {scan,calculate,generate,draft,preview,verify,push-crm}`: periodic encouraging email and momentum system for students and teachers (conforming to `https://xinchaovi.com/student` design tokens and psychological copywriting principles):
+  - `scan`: scan Preply email notifications via live Spark Desktop or cached JSON files.
+  - `calculate`: derive Single Source of Truth progress metrics (balances, completion rates, streaks, milestone progression).
+  - `generate`: render production-grade responsive HTML, plaintext, or JSON email bodies.
+  - `draft`: push generated email directly to user's Spark Desktop drafts.
+  - `preview`: save rendered HTML and open directly in the browser for visual inspection.
+  - `verify`: execute automated mathematical and psychological invariant checks.
+  - `push-crm`: synchronize and seed templates directly into FluentCRM's `fc_template` on WordPress (`xinchaovi.com`) with remote readback verification.
 
 ## Notes
 

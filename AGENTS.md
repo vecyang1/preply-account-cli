@@ -224,3 +224,36 @@ To (re)capture a session while present in Chrome: `preply session capture`
     2. *Recent Operational Velocity*: `lessonsBookedLast48h` on the public profile payload (bookings created in the past 48 hours).
     3. *Upcoming Availability*: `timeslotsForBooking` from `tutor-schedule` (open slots across the next N days). A tutor with recent reviews and `lessonsBookedLast48h: 4` can legitimately show `booked: 0` and `free: 128` on future dates if their upcoming availability is fully open and unreserved.
 
+## Preply Periodic Email & Motivation System (`preply digest`) (2026-09-08)
+
+Engineered a complete, production-grade periodic email notification and motivation engine for both Learners (students) and Tutors (educators) conforming to `https://xinchaovi.com/student` design tokens and psychological copywriting principles ("说人话，不要说实话").
+
+### Architecture & Subsystems:
+1. **Scanner & Parser (`PreplyEmailScanner`)**:
+   - Scans live mailbox events via `spark search --filter "from:preply.com"` across accounts (`vecs@foxmail.com` and `yanghxmail@gmail.com`) or parses JSON snapshots (`data/preply_scanned_emails.json`).
+   - Categorizes 10+ distinct Preply lifecycle events (completed lessons, upcoming bookings, subscription renewals, pauses, streak milestones, payout notifications).
+2. **Single Source of Truth Metrics (`SSOTCalculator`)**:
+   - Mathematical invariants: `Available Balance = max(0, Granted - Consumed - Scheduled)`. Non-negative bounds, clamped completion rates (0-100%).
+   - Dynamic milestone ladder (6 progression levels for learners, 5 for tutors) with automatic unlock tracking.
+3. **Psychological Copywriting (`PsychologicalCopywriter`)**:
+   - Trilingual support: Simplified Chinese (`zh-CN`), English (`en`), Vietnamese (`vi`).
+   - Reframes pauses as natural knowledge digestion/consolidation; reframes hours remaining into finish-line proximity; praises 100% hour depletion as milestone victory.
+   - Zero guilt-tripping or harsh billing jargon.
+4. **Design System Parity Renderer (`XinChaoViEmailRenderer`)**:
+   - 100% parity with `xinchaovi.com/student` brand tokens: Terracotta (`#E07A5F`), Dark Slate (`#1E293B`), Sage (`#81B29A`), Amber (`#F59E0B`).
+   - Dark gradient hero progress card, milestone beads, 3-column stats grid, upcoming session cards, and mobile-responsive inline CSS.
+5. **Spark Drafter (`EmailDrafter`)**:
+   - Pushes drafts directly into Spark Desktop via local IPC; gracefully falls back to local HTML preview generation (`data/preview_digest.html`) when IPC has read-only permissions.
+6. **FluentCRM Synchronization (`FluentCRMSync`)**:
+   - Seeds production templates directly into WordPress `fc_template` custom post type on `xinchaovi.com` via `fluentcrm-ops`.
+   - Enforces unidirectional data flow: API mutation -> immediate remote readback verification.
+   - Published live templates: IDs `2733` (Learner ZH), `2734` (Tutor ZH), `2735` (Learner EN), `2736` (Tutor EN), `2737` (Learner VI), `2738` (Tutor VI).
+
+### Commands:
+- `preply digest scan [--live] [--save data/events.json] [--in-file path]`
+- `preply digest calculate [--role learner|tutor] [--json]`
+- `preply digest generate [--role learner|tutor] [--lang en|zh-CN|vi] [--out file.html]`
+- `preply digest draft [--role learner|tutor] [--to email]`
+- `preply digest preview [--role learner|tutor] [--lang zh-CN]`
+- `preply digest verify` (mathematical & psychological invariant checks)
+- `preply digest push-crm [--site xinchaovi.com] [--role learner|tutor|all] [--lang zh-CN|en|vi] [--dry-run]`
