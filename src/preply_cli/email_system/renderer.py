@@ -107,14 +107,14 @@ class XinChaoViEmailRenderer:
         if metrics.upcoming_sessions:
             for s in metrics.upcoming_sessions:
                 upcoming_items_html += f"""
-                <table width="100%" cellpadding="0" cellspacing="0" class="gm-session-card" style="margin-bottom: 10px; background-color: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_PRIMARY}; border-radius: 8px; padding: 12px 14px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-session-card" style="margin-bottom: 10px; background-color: #FAFAFA; border: 1px solid #E2E8F0; border-left: 4px solid {cls.BRAND_PRIMARY}; border-radius: 8px;">
                     <tr>
-                        <td style="vertical-align: middle;">
+                        <td style="vertical-align: middle; padding: 12px 14px;">
                             <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">📅 {s.datetime_str}</div>
                             <div style="font-size: 12px; color: #475569; margin-bottom: 2px;"><strong>Instructor:</strong> {s.partner_name} · <strong>Subject:</strong> {s.subject_name}</div>
                             <div style="font-size: 12px; color: #64748B;">{s.topic}</div>
                         </td>
-                        <td align="right" valign="middle" class="gm-session-action" style="width: 105px; padding-left: 10px;">
+                        <td align="right" valign="middle" class="gm-session-action" style="width: 110px; padding: 12px 14px 12px 0;">
                             <a href="{s.meet_url or config.portal_url}" style="display: inline-block; background-color: #FFFFFF; border: 1px solid #CBD5E1; color: #1E293B; font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 6px; text-decoration: none; white-space: nowrap;">Join / View →</a>
                         </td>
                     </tr>
@@ -217,7 +217,7 @@ class XinChaoViEmailRenderer:
                 <td>
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <td style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.6px;">
+                      <td style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #CBD5E1; letter-spacing: 0.6px;">
                         CURRENT CYCLE PROGRESS
                       </td>
                       <td align="right">
@@ -228,45 +228,38 @@ class XinChaoViEmailRenderer:
                     </tr>
                   </table>
                   
-                  <div style="margin: 12px 0 16px 0;">
+                  <div style="margin: 12px 0 14px 0;">
                     <span class="gm-hero-number" style="font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -1px; color: #FFFFFF;">{metrics.current_cycle_consumed}</span>
-                    <span style="font-size: 15px; color: #94A3B8; font-weight: 600;"> / {metrics.current_cycle_granted} Lessons Completed</span>
+                    <span style="font-size: 15px; color: #CBD5E1; font-weight: 600;"> / {metrics.current_cycle_granted} Lessons Completed</span>
                   </div>
 
                   <!-- Progress Bar with Solid Fallback -->
-                  <div style="height: 12px; background-color: rgba(255, 255, 255, 0.15); border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
-                    <div style="height: 100%; width: {progress_width}%; background-color: {cls.BRAND_PRIMARY}; background: linear-gradient(90deg, #E07A5F 0%, #F59E0B 60%, #10B981 100%); border-radius: 6px;"></div>
+                  <div style="height: 10px; background-color: rgba(255, 255, 255, 0.15); border-radius: 999px; overflow: hidden; margin-bottom: 12px;">
+                    <div style="height: 100%; width: {progress_width}%; background-color: {cls.BRAND_PRIMARY}; background: linear-gradient(90deg, #E07A5F 0%, #F59E0B 100%); border-radius: 999px;"></div>
                   </div>
 
-                  <!-- Milestone Beads -->
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 6px;">
-                    <tr>
-                      {beads_html}
-                    </tr>
-                  </table>
-
-                  <div style="font-size: 11px; color: #94A3B8; margin-top: 10px;">
-                    Subscribed via Preply · Next Cycle Auto-Refill: <strong>{metrics.next_renewal_date or 'October 2026'}</strong>
+                  <div style="font-size: 11.5px; color: #CBD5E1; margin-top: 8px;">
+                    Subscribed via Preply · Next Cycle Auto-Refill: <strong style="color: #FFFFFF;">{metrics.next_renewal_date or 'October 2026'}</strong>
                   </div>
                 </td>
               </tr>
             </table>
 
             <!-- 3-Column Stats Grid (with mobile classes) -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-sub-bg" style="background-color: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px; padding: 12px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="gm-sub-bg" style="background-color: #F8FAFC; border: 1px solid {cls.BRAND_BORDER}; border-radius: 12px; margin-bottom: 16px;">
               <tr>
-                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER}; padding: 14px 8px;">
                   <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{metrics.total_completed_lessons}</div>
                   <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_completed_label']}</div>
                   <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">({metrics.total_hours:.1f} Total Hrs)</div>
                 </td>
-                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER};">
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; border-right: 1px solid {cls.BRAND_BORDER}; padding: 14px 8px;">
                   <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_PRIMARY};">{metrics.available_balance}</div>
                   <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_balance_label']}</div>
                   <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">(Ready to Book)</div>
                 </td>
-                <td align="center" class="gm-stat-cell" style="width: 33.3%;">
-                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: #10B981;">{copy['stat_streak_val']}</div>
+                <td align="center" class="gm-stat-cell" style="width: 33.3%; padding: 14px 8px;">
+                  <div class="gm-stat-num" style="font-size: 22px; font-weight: 800; color: {cls.BRAND_DARK};">{copy['stat_streak_val']}</div>
                   <div class="gm-stat-lbl" style="font-size: 11px; color: {cls.BRAND_TEXT_MUTED}; font-weight: 600; margin-top: 2px;">{copy['stat_streak_label']}</div>
                   <div class="gm-stat-sub" style="font-size: 10px; color: #94A3B8;">(Steady Habit)</div>
                 </td>
@@ -274,26 +267,26 @@ class XinChaoViEmailRenderer:
             </table>
 
             <!-- Next Milestone Spotlight Card -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFF9F7; border: 1.5px solid #F1D4C8; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFFDF9; border: 1.5px solid #FCD34D; border-radius: 12px; margin-bottom: 16px;">
               <tr>
-                <td>
+                <td style="padding: 16px;">
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <td style="font-size: 10px; font-weight: 800; color: {cls.BRAND_PRIMARY}; letter-spacing: 0.6px; text-transform: uppercase;">
+                      <td style="font-size: 11px; font-weight: 800; color: #92400E; letter-spacing: 0.2px; text-transform: uppercase;">
                         {copy['spotlight_tag']}
                       </td>
                       <td align="right">
-                        <span style="background-color: #FDF2F0; border: 1px solid #F4A261; color: {cls.BRAND_PRIMARY}; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                        <span style="background-color: #FFFFFF; border: 1px solid #FCD34D; color: #B45309; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">
                           {copy['spotlight_needed']}
                         </span>
                       </td>
                     </tr>
                   </table>
-                  <div style="font-size: 16px; font-weight: 800; color: {cls.BRAND_DARK}; margin: 8px 0 4px 0;">
+                  <div style="font-size: 15px; font-weight: 800; color: #78350F; margin: 8px 0 4px 0;">
                     🏅 {copy['spotlight_title']}
                   </div>
-                  <div style="font-size: 12px; color: {cls.BRAND_TEXT_MUTED}; line-height: 1.5;">
-                    <strong style="color: {cls.BRAND_PRIMARY};">{copy['spotlight_perk_label']}</strong> {copy['spotlight_perk']}
+                  <div style="font-size: 12px; color: #92400E; line-height: 1.5;">
+                    <strong style="color: #B45309;">{copy['spotlight_perk_label']}</strong> {copy['spotlight_perk']}
                   </div>
                 </td>
               </tr>

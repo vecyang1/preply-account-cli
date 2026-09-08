@@ -73,7 +73,7 @@ class PsychologicalCopywriter:
                 "stat_balance_label": "待预约余额",
                 "stat_streak_label": "连续学习周数",
                 "stat_streak_val": f"{metrics.current_streak_weeks} 周",
-                "spotlight_tag": "🌟 荣 誉 里 程 碑 顶 峰 成 就" if is_peak else "即 将 解 锁 的 下 一 里 程 碑",
+                "spotlight_tag": "🌟 荣誉里程碑顶峰成就" if is_peak else "即将解锁的下一里程碑",
                 "spotlight_title": "殿堂级语言大家 (Fluency Ambassador)" if is_peak else next_m_title,
                 "spotlight_needed": "✨ 终身荣誉已解锁" if is_peak else (f"还需 {needed} 节课解锁" if needed > 0 else "里程碑已全部达成！"),
                 "spotlight_perk_label": "🎁 专属成长特权：" if is_peak else "🎁 解锁成长权益：",

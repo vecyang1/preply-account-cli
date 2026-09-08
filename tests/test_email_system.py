@@ -571,7 +571,7 @@ class TestPeakMilestonesAndOutlookRendering(unittest.TestCase):
         )
         copy_zh = PsychologicalCopywriter.craft_learner_copy(metrics, Language.ZH)
         self.assertIn("殿堂级语言大家", copy_zh["spotlight_title"])
-        self.assertIn("顶 峰", copy_zh["spotlight_tag"])
+        self.assertIn("顶峰", copy_zh["spotlight_tag"])
 
         copy_en = PsychologicalCopywriter.craft_learner_copy(metrics, Language.EN)
         self.assertIn("Fluency Ambassador", copy_en["spotlight_title"])
