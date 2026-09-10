@@ -399,7 +399,7 @@ Schedule your next conversation:
 Transparency Portal:
 {config.portal_url}
 
-XinChaoVi Learning Hub · support@xinchaovi.com
+XinChaoVi Learning Hub · support@example.com
 """
 
         return subject, html, text

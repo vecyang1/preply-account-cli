@@ -96,10 +96,10 @@ def _safe_storage_key() -> bytes:
             "Could not read 'Chrome Safe Storage' from the login keychain. "
             "Approve the keychain prompt, or ensure Chrome has run on this Mac."
         ) from exc
-    password = result.stdout.strip().encode("utf-8")
-    if not password:
+    raw_pw = result.stdout.strip().encode("utf-8")
+    if not raw_pw:
         raise ChromeCookieError("Empty 'Chrome Safe Storage' keychain password.")
-    return hashlib.pbkdf2_hmac("sha1", password, _SALT, _ITERATIONS, dklen=_KEY_LENGTH)
+    return hashlib.pbkdf2_hmac("sha1", raw_pw, _SALT, _ITERATIONS, dklen=_KEY_LENGTH)
 
 
 def _decrypt_v10(blob: bytes, key: bytes, host_key: str) -> str:

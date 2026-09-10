@@ -19,7 +19,7 @@ docs/production-hardening-plan.md
 docs/preply-graphql-catalog.md
 docs/preply-operations.graphql
 docs/preply-operation-names.txt
-# Private workspace backlink card: contains 2nd Brain vault paths and local usernames.
+# Private workspace backlink card
 PROJECT_LINKS.md
 # Git bundle of the pre-purge history (catalogue + workspace card). Kept as the
 # rollback for the history rewrite, as a file rather than as branches: branches

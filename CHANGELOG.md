@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.1 - 2026-09-10
+
+### Security & Privacy Sanitization
+- Virtualized hardcoded email addresses across CLI commands, email templates, tests, and documentation to RFC 2606 reserved domains.
+- Virtualized test fixture proxy URLs to proxy.example.com.
+- Replaced hardcoded local machine paths in scripts/run_weekly_digest.sh with portable script-relative directory detection.
+- Fixed LICENSE placeholder and removed private workspace tokens from .gitignore.
+
 ## 0.13.0 - 2026-09-08
 
 ### Production Hardening: Cross-Client Email Compatibility, Peak Milestones & Automation Runner
@@ -26,7 +34,7 @@
 ### New: Periodic Encouragement Email & Motivation System (`preply digest`)
 
 - **Scanner & Categorizer (`PreplyEmailScanner`)**:
-  - Live query via `spark search --filter "from:preply.com"` across mailboxes (`vecs@foxmail.com` and `yanghxmail@gmail.com`) or file caches (`data/preply_scanned_emails.json`).
+  - Live query via `spark search --filter "from:preply.com"` across mailboxes (`user@example.com` and `learner@example.com`) or file caches (`data/preply_scanned_emails.json`).
   - Classifies 10+ Preply lifecycle email categories (completed lessons, upcoming bookings, subscription renewals, pauses, streaks, payouts).
 - **Single Source of Truth Metrics (`SSOTCalculator`)**:
   - Computes non-negative available balances, clamped completion rates, streaks, and milestone progression.

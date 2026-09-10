@@ -230,7 +230,7 @@ Engineered a complete, production-grade periodic email notification and motivati
 
 ### Architecture & Subsystems:
 1. **Scanner & Parser (`PreplyEmailScanner`)**:
-   - Scans live mailbox events via `spark search --filter "from:preply.com"` across accounts (`vecs@foxmail.com` and `yanghxmail@gmail.com`) or parses JSON snapshots (`data/preply_scanned_emails.json`).
+   - Scans live mailbox events via `spark search --filter "from:preply.com"` across accounts (`user@example.com` and `learner@example.com`) or parses JSON snapshots (`data/preply_scanned_emails.json`).
    - Categorizes 10+ distinct Preply lifecycle events (completed lessons, upcoming bookings, subscription renewals, pauses, streak milestones, payout notifications).
 2. **Single Source of Truth Metrics (`SSOTCalculator`)**:
    - Mathematical invariants: `Available Balance = max(0, Granted - Consumed - Scheduled)`. Non-negative bounds, clamped completion rates (0-100%).

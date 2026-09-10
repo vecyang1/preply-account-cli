@@ -60,12 +60,12 @@ class TransportProxyResolutionTests(unittest.TestCase):
 
     def test_mask_proxy_redacts_credentials(self):
         self.assertEqual(
-            mask_proxy("http://user:secret123@gw.dataimpulse.com:823"),
-            "http://user:***@gw.dataimpulse.com:823",
+            mask_proxy("http://user:secret123@proxy.example.com:823"),
+            "http://user:***@proxy.example.com:823",
         )
         self.assertEqual(
-            mask_proxy("http://gw.dataimpulse.com:823"),
-            "http://gw.dataimpulse.com:823",
+            mask_proxy("http://proxy.example.com:823"),
+            "http://proxy.example.com:823",
         )
         self.assertEqual(mask_proxy(None), "none")
 

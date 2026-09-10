@@ -4,14 +4,14 @@
 
 set -euo pipefail
 
-PROJECT_DIR="/Users/vecsatfoxmailcom/Documents/A-coding/2026-05-29 preply-account-cli"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 mkdir -p data/digests
 
 echo "=== [$(date '+%Y-%m-%d %H:%M:%S')] Starting Preply Weekly Digest Pipeline ==="
 
-/opt/homebrew/bin/python3 -m preply_cli digest run \
+${PYTHON_BIN:-python3} -m preply_cli digest run \
     --role both \
     --lang zh-CN \
     --push-crm \

@@ -47,8 +47,8 @@ class TestEmailContracts(unittest.TestCase):
     def test_email_record_serialization(self):
         rec = EmailRecord(
             message_id=713844,
-            account="vecs@foxmail.com",
-            sender="Preply <noreply@tips.preply.com>",
+            account="learner@example.com",
+            sender="Preply <noreply@example.com>",
             date="2026-08-11 15:40",
             subject="You used all your monthly hours 🎉",
             category=EmailCategory.MONTHLY_HOURS_DEPLETED,
@@ -126,7 +126,7 @@ class TestSSOTCalculator(unittest.TestCase):
         emails = [
             EmailRecord(
                 message_id=1,
-                account="vecs@foxmail.com",
+                account="learner@example.com",
                 sender="Preply",
                 date="2026-08-01 10:00",
                 subject="Your lesson with Victor was autoconfirmed",
@@ -137,7 +137,7 @@ class TestSSOTCalculator(unittest.TestCase):
             ),
             EmailRecord(
                 message_id=2,
-                account="vecs@foxmail.com",
+                account="learner@example.com",
                 sender="Preply",
                 date="2026-08-05 10:00",
                 subject="Your lesson with Victor was autoconfirmed",
@@ -148,7 +148,7 @@ class TestSSOTCalculator(unittest.TestCase):
             ),
             EmailRecord(
                 message_id=3,
-                account="vecs@foxmail.com",
+                account="learner@example.com",
                 sender="Preply",
                 date="2026-08-10 20:00",
                 subject="Your Vietnamese lesson is coming up ⏰",
@@ -159,7 +159,7 @@ class TestSSOTCalculator(unittest.TestCase):
             ),
             EmailRecord(
                 message_id=4,
-                account="vecs@foxmail.com",
+                account="learner@example.com",
                 sender="Preply",
                 date="2026-08-01 12:00",
                 subject="Chapelle, your subscription has been renewed 🎉",
@@ -205,7 +205,7 @@ class TestSSOTCalculator(unittest.TestCase):
         emails = [
             EmailRecord(
                 message_id=10,
-                account="yanghxmail@gmail.com",
+                account="tutor@example.com",
                 sender="Preply",
                 date="2026-08-01 10:00",
                 subject="StudentA confirmed a lesson",
@@ -215,7 +215,7 @@ class TestSSOTCalculator(unittest.TestCase):
             ),
             EmailRecord(
                 message_id=11,
-                account="yanghxmail@gmail.com",
+                account="tutor@example.com",
                 sender="Preply",
                 date="2026-08-02 10:00",
                 subject="StudentB confirmed a lesson",
@@ -225,7 +225,7 @@ class TestSSOTCalculator(unittest.TestCase):
             ),
             EmailRecord(
                 message_id=12,
-                account="yanghxmail@gmail.com",
+                account="tutor@example.com",
                 sender="Preply",
                 date="2026-08-03 10:00",
                 subject="StudentC tried to book a lesson",

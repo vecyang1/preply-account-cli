@@ -177,7 +177,7 @@ class DigestConfig:
     recipient_name: str = "Learner"
     recipient_email: str = "student@example.com"
     sender_name: str = "XinChaoVi Learning Hub"
-    sender_email: str = "support@xinchaovi.com"
+    sender_email: str = "support@example.com"
     portal_url: str = "https://xinchaovi.com/student/"
     booking_url: str = "https://xinchaovi.com/student/"
     language: Language = Language.EN

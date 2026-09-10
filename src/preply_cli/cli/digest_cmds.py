@@ -60,7 +60,7 @@ def _load_emails(in_file: str | None, role: UserRole) -> list[Any]:
         emails = scanner.scan_from_file(cache_path)
     else:
         # Fallback to spark live scan
-        account = "yanghxmail@gmail.com" if role == UserRole.TUTOR else "vecs@foxmail.com"
+        account = "tutor@example.com" if role == UserRole.TUTOR else "learner@example.com"
         emails = scanner.scan_from_spark(account, max_pages=10)
 
     if role == UserRole.LEARNER:
@@ -92,14 +92,14 @@ def cmd_digest_scan(args: argparse.Namespace) -> int:
         if acct:
             records = scanner.scan_from_spark(acct, max_pages=getattr(args, "max_pages", 10))
         else:
-            records.extend(scanner.scan_from_spark("vecs@foxmail.com", max_pages=10))
-            records.extend(scanner.scan_from_spark("yanghxmail@gmail.com", max_pages=10))
+            records.extend(scanner.scan_from_spark("learner@example.com", max_pages=10))
+            records.extend(scanner.scan_from_spark("tutor@example.com", max_pages=10))
     else:
         source_file = getattr(args, "in_file", None) or DEFAULT_SCAN_CACHE
         if not Path(source_file).exists():
             # Run live scan if cache missing
-            records.extend(scanner.scan_from_spark("vecs@foxmail.com", max_pages=6))
-            records.extend(scanner.scan_from_spark("yanghxmail@gmail.com", max_pages=4))
+            records.extend(scanner.scan_from_spark("learner@example.com", max_pages=6))
+            records.extend(scanner.scan_from_spark("tutor@example.com", max_pages=4))
         else:
             records = scanner.scan_from_file(source_file)
 
@@ -223,7 +223,7 @@ def cmd_digest_draft(args: argparse.Namespace) -> int:
 
     to_email = getattr(args, "to", None)
     if not to_email:
-        to_email = "vecs@foxmail.com" if role == UserRole.LEARNER else "yanghxmail@gmail.com"
+        to_email = "learner@example.com" if role == UserRole.LEARNER else "tutor@example.com"
 
     acct_email = getattr(args, "account", None)
 

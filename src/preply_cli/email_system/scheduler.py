@@ -65,8 +65,8 @@ class DigestAutomationRunner:
         if scan_cache.exists():
             emails = scanner.scan_from_file(scan_cache)
         else:
-            emails = scanner.scan_from_spark("vecs@foxmail.com", max_pages=6)
-            emails.extend(scanner.scan_from_spark("yanghxmail@gmail.com", max_pages=4))
+            emails = scanner.scan_from_spark("learner@example.com", max_pages=6)
+            emails.extend(scanner.scan_from_spark("tutor@example.com", max_pages=4))
 
         roles_to_run = [UserRole.LEARNER, UserRole.TUTOR] if role == UserRole.BOTH else [role]
         results: list[DigestRunResult] = []
@@ -84,7 +84,7 @@ class DigestAutomationRunner:
                 except Exception:
                     snap_data = None
 
-            recipient = recipient_override or ("yanghxmail@gmail.com" if r == UserRole.TUTOR else "vecs@foxmail.com")
+            recipient = recipient_override or ("tutor@example.com" if r == UserRole.TUTOR else "learner@example.com")
             config = DigestConfig(
                 role=r,
                 language=language,
