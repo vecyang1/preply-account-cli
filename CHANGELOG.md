@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.2 - 2026-09-14
+
+### Fixed
+- Fixed CI test assertion in `test_run_pipeline_dry_run_learner` to allow all valid milestone and motivational emojis (`🌿`, `🎉`, `🌟`, `✨`) when running in clean CI environments without local data snapshots (`MAT-036`).
+
 ## 0.13.1 - 2026-09-10
 
 ### Security & Privacy Sanitization
