@@ -54,6 +54,31 @@ def extract_tutor_id(source: str) -> int:
     )
 
 
+def _resolve_iana_timezone(tzname: str | None) -> str:
+    """Resolve a timezone name into a valid IANA timezone string accepted by Preply GraphQL.
+
+    Handles 'local', empty strings, or None by resolving the system's local IANA timezone
+    (e.g., from /etc/localtime on macOS/Linux), falling back to DEFAULT_TIMEZONE.
+    """
+    if not tzname or str(tzname).strip().lower() == "local":
+        try:
+            p = Path("/etc/localtime").resolve()
+            parts = p.parts
+            if "zoneinfo" in parts:
+                idx = parts.index("zoneinfo")
+                candidate = "/".join(parts[idx + 1 :])
+                ZoneInfo(candidate)
+                return candidate
+        except Exception:
+            pass
+        return DEFAULT_TIMEZONE
+    try:
+        ZoneInfo(tzname)
+        return tzname
+    except Exception:
+        return DEFAULT_TIMEZONE
+
+
 def _to_local_dt(dt_str: str, tzname: str) -> datetime | None:
     if not dt_str:
         return None
@@ -286,7 +311,7 @@ def load_tutor_schedule(
     timeout: float = 30.0,
 ) -> dict[str, Any]:
     """Load schedule from a file path or live network fetch."""
-    resolved_tz = tzname or DEFAULT_TIMEZONE
+    resolved_tz = _resolve_iana_timezone(tzname)
     dur_hours = duration_hours if duration_hours is not None else DEFAULT_DURATION_HOURS
 
     # 1. If source is an existing local file, load offline

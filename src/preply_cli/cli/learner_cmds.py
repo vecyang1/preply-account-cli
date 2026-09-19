@@ -91,6 +91,7 @@ def cmd_lessons(args: argparse.Namespace) -> None:
 
 def cmd_upcoming(args: argparse.Namespace) -> None:
     from ..analysis import upcoming_rows
+    from ..formatting import format_datetime_local
 
     if getattr(args, "file", None):
         path = Path(args.file).expanduser().resolve()
@@ -107,8 +108,15 @@ def cmd_upcoming(args: argparse.Namespace) -> None:
 
         print(format_csv(rows, columns), end="")
         return
-    print(f"Upcoming lessons ({len(rows)})")
-    print(format_table(rows, columns))
+    target_tz = getattr(args, "timezone", None)
+    display_rows = []
+    for r in rows:
+        r_disp = dict(r)
+        if r_disp.get("datetime"):
+            r_disp["datetime"] = format_datetime_local(r_disp["datetime"], target_tz)
+        display_rows.append(r_disp)
+    print(f"Upcoming lessons ({len(display_rows)})")
+    print(format_table(display_rows, columns))
 
 
 def cmd_tutors(args: argparse.Namespace) -> None:
@@ -385,13 +393,22 @@ def cmd_me(args: argparse.Namespace) -> None:
     print(f"Preply · {account.get('name') or 'account'}")
     print(format_table(headline, ["metric", "value"]))
 
-    print()
-    print(f"Upcoming lessons ({len(upcoming)})")
-    print(format_table(upcoming, ["datetime", "subject", "tutor", "duration", "status"]))
+    from ..formatting import format_datetime_local
+
+    display_upcoming = [
+        {**r, "datetime": format_datetime_local(r.get("datetime"))} for r in upcoming
+    ]
+    display_recent = [
+        {**r, "datetime": format_datetime_local(r.get("datetime"))} for r in recent
+    ]
 
     print()
-    print(f"Recent lessons ({len(recent)})")
-    print(format_table(recent, ["datetime", "subject", "tutor", "status", "paid", "rating"]))
+    print(f"Upcoming lessons ({len(display_upcoming)})")
+    print(format_table(display_upcoming, ["datetime", "subject", "tutor", "duration", "status"]))
+
+    print()
+    print(f"Recent lessons ({len(display_recent)})")
+    print(format_table(display_recent, ["datetime", "subject", "tutor", "status", "paid", "rating"]))
 
     print()
     undated = sum(1 for r in charges if r["next_charge"] == UNREADABLE_DATE)

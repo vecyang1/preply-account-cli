@@ -305,6 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     upcoming = sub.add_parser("upcoming", help="Learner upcoming lessons (booked lessons and recurrent reservations).")
     upcoming.add_argument("-f", "--file", help="Path to a saved snapshot JSON file to run offline.")
+    upcoming.add_argument("--timezone", "--tz", default=None, help="Timezone for lesson display (e.g. Asia/Bangkok, Asia/Shanghai, UTC; defaults to local system timezone).")
     upcoming.add_argument("--json", action="store_true")
     upcoming.add_argument("--csv", action="store_true", help="Format output as CSV.")
     upcoming.set_defaults(func=cmd_upcoming)

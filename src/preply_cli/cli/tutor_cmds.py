@@ -53,13 +53,12 @@ def _student_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _schedule_rows(data: dict[str, Any]) -> list[dict[str, Any]]:
-    nodes = (
-        data.get("schedule", {})
-        .get("currentUser", {})
-        .get("tutor", {})
-        .get("calendar", {})
-        .get("nodes", [])
-    )
+    schedule_data = data.get("schedule") if isinstance(data.get("schedule"), dict) else data
+    current_user = schedule_data.get("currentUser") if isinstance(schedule_data, dict) else {}
+    tutor = current_user.get("tutor") if isinstance(current_user, dict) else None
+    if not isinstance(tutor, dict):
+        return []
+    nodes = (tutor.get("calendar") or {}).get("nodes", [])
     rows = []
     for node in nodes:
         lesson = node.get("lesson") or {}
@@ -182,6 +181,14 @@ def cmd_schedule(args: argparse.Namespace) -> None:
     else:
         data = _client(args).schedule(days=args.days, tzname=args.timezone)
     rows = _schedule_rows(data)
+    if not rows and not getattr(args, "json", False) and not getattr(args, "csv", False):
+        schedule_data = data.get("schedule") if isinstance(data.get("schedule"), dict) else data
+        current_user = schedule_data.get("currentUser") if isinstance(schedule_data, dict) else {}
+        if not current_user.get("tutor"):
+            print("Current account is a learner (no tutor teaching schedule).")
+            print("• For your booked lessons as a learner: run `preply upcoming`")
+            print("• For a tutor's public booking schedule: run `preply tutor-schedule <tutor_id_or_url>`")
+            return
     _emit(data, rows, ["start", "end", "student", "status", "lesson_id", "tutoring_id", "duration"], args)
 
 

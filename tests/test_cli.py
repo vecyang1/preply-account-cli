@@ -171,3 +171,42 @@ class WarningChannelTests(unittest.TestCase):
         with redirect_stderr(err):
             _print_data_warnings({"warnings": []}, {})
         self.assertEqual(err.getvalue(), "")
+
+
+class ScheduleAndTimezoneTests(unittest.TestCase):
+    """Tests for tutor schedule safety and learner upcoming timezone formatting."""
+
+    def test_schedule_rows_handles_learner_account_without_tutor(self):
+        from preply_cli.cli.tutor_cmds import _schedule_rows
+
+        # When account is a learner, currentUser.tutor is None
+        data = {"schedule": {"currentUser": {"tutor": None}}}
+        self.assertEqual(_schedule_rows(data), [])
+
+        data_bare = {"currentUser": {"tutor": None}}
+        self.assertEqual(_schedule_rows(data_bare), [])
+
+    def test_upcoming_accepts_timezone_flag(self):
+        args = build_parser().parse_args(["upcoming", "--timezone", "Asia/Ho_Chi_Minh"])
+        self.assertEqual(args.command, "upcoming")
+        self.assertEqual(args.timezone, "Asia/Ho_Chi_Minh")
+
+    def test_format_datetime_local_converts_properly(self):
+        from preply_cli.formatting import format_datetime_local
+
+        # 14:00 UTC -> 21:00 UTC+07 (Asia/Ho_Chi_Minh)
+        formatted = format_datetime_local("2026-09-21T14:00:00+00:00", "Asia/Ho_Chi_Minh")
+        self.assertIn("2026-09-21 21:00", formatted)
+        self.assertIn("UTC+07", formatted)
+
+        # Fallback on invalid input
+        self.assertEqual(format_datetime_local(""), "")
+        self.assertEqual(format_datetime_local("invalid"), "invalid")
+
+    def test_resolve_iana_timezone_handles_local_and_zones(self):
+        from preply_cli.public_schedule import _resolve_iana_timezone
+
+        self.assertEqual(_resolve_iana_timezone("Asia/Ho_Chi_Minh"), "Asia/Ho_Chi_Minh")
+        local_res = _resolve_iana_timezone("local")
+        self.assertTrue(bool(local_res))
+        self.assertNotEqual(local_res.lower(), "local")

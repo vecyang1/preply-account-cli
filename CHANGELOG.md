@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.13.3 - 2026-09-19
+
+### Fixed
+- Fixed unhandled `AttributeError: 'NoneType' object has no attribute 'get'` in `_schedule_rows` when `preply schedule` is invoked under a learner account (`currentUser.tutor` is None). Added graceful detection and user guidance pointing to `preply upcoming` (learner bookings) and `preply tutor-schedule <tutor_id>` (public tutor availability).
+- Supported `local` timezone in `preply tutor-schedule --tz local` by resolving system IANA timezone via `/etc/localtime` (macOS/Linux) and validating before sending to Preply GraphQL backend.
+
+### Added
+- Added `--timezone` / `--tz` flag to `preply upcoming`, formatting lesson datetimes into human-readable local or requested timezone (defaulting to system local timezone, e.g. `UTC+08`) with ISO format preserved in `--json` and `--csv`.
+- Timezone-aware date formatting across `preply me` dashboard upcoming and recent lesson tables via `format_datetime_local`.
+
 ## 0.13.2 - 2026-09-14
 
 ### Fixed
